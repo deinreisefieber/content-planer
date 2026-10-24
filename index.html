@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIDA Content-Planer</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Content-Planer">
+<meta name="theme-color" content="#0b7a8f">
+<style>
+:root{
+  --bg:#f4f6f8; --card:#ffffff; --text:#14202b; --muted:#5b6b78; --line:#dde3e8;
+  --accent:#0b7a8f; --accent-soft:#e2f3f6; --done:#2e8b57; --warn:#b4560b; --warn-soft:#fdf0e3;
+  --pdf:#5a4fcf; --pdf-soft:#ecebfb; --code:#eef2f5;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f161c; --card:#17212a; --text:#e5edf2; --muted:#93a4b1; --line:#2a3a46;
+    --accent:#4cc3d6; --accent-soft:#16343b; --done:#5cc58a; --warn:#f0a35c; --warn-soft:#3a2a1a;
+    --pdf:#a69ff5; --pdf-soft:#29264a; --code:#1f2c36;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f161c; --card:#17212a; --text:#e5edf2; --muted:#93a4b1; --line:#2a3a46;
+  --accent:#4cc3d6; --accent-soft:#16343b; --done:#5cc58a; --warn:#f0a35c; --warn-soft:#3a2a1a;
+  --pdf:#a69ff5; --pdf-soft:#29264a; --code:#1f2c36;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header h1{font-size:18px;margin:0}
+header .sub{color:var(--muted);font-size:13px}
+header .spacer{flex:1}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:8px;padding:6px 12px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] button.primary{color:#0f161c}
+.tabs{display:flex;gap:6px}
+.tabs button[aria-selected="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.nav input[type=date]{font:inherit;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text)}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.hero .daylabel{color:var(--accent);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+.hero h2{margin:4px 0 2px;font-size:26px}
+.hero .meta{color:var(--muted)}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.badge{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.progress{height:8px;background:var(--line);border-radius:99px;margin-top:14px;overflow:hidden}
+.progress>div{height:100%;background:var(--done);transition:width .3s}
+.ptext{font-size:13px;color:var(--muted);margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h3{margin:0 0 10px;font-size:16px;display:flex;align-items:center;gap:8px}
+.card h3 .count{margin-left:auto;font-size:12px;color:var(--muted);font-weight:400}
+.full{grid-column:1/-1}
+ul.check{list-style:none;margin:0;padding:0}
+ul.check li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line)}
+ul.check li:first-child{border-top:0}
+ul.check input{margin-top:3px;width:18px;height:18px;accent-color:var(--done);flex:none}
+ul.check label{flex:1;cursor:pointer}
+li.is-done label{color:var(--muted);text-decoration:line-through}
+.tag{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--pdf-soft);color:var(--pdf);font-weight:600;margin-left:6px;white-space:nowrap}
+.del{border:0;background:none;color:var(--muted);padding:0 4px}
+.sub-h{font-size:13px;color:var(--muted);margin:14px 0 4px;font-weight:600}
+.add{display:flex;gap:6px;margin-top:10px}
+.add input{flex:1;min-width:0;font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.hook{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+.hook.is-done{opacity:.65}
+.hook-head{display:flex;gap:10px;align-items:center}
+.hook-head input{width:20px;height:20px;accent-color:var(--done);flex:none}
+.hook-head .num{font-weight:700;color:var(--accent)}
+.hook-head .title{font-weight:600;flex:1}
+.hook blockquote{margin:10px 0;padding:8px 12px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;font-size:16px}
+.hook .shots{margin:6px 0 10px;padding-left:20px;color:var(--muted);font-size:14px}
+.path{display:flex;gap:6px;align-items:stretch}
+.path code{flex:1;min-width:0;overflow-wrap:anywhere;background:var(--code);padding:6px 8px;border-radius:8px;font:13px/1.4 Consolas,monospace}
+.path button{font-size:13px;padding:4px 10px;white-space:nowrap}
+.note{font-size:13px;color:var(--muted)}
+.rule{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px;margin-top:12px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-top:1px solid var(--line);font-size:14px}
+th{background:var(--code);border-top:0;font-size:12px;text-transform:uppercase;color:var(--muted)}
+tr.row{cursor:pointer}
+tr.row:hover td{background:var(--accent-soft)}
+tr.today td{font-weight:600}
+.mini{display:inline-block;width:80px;height:6px;background:var(--line);border-radius:9px;vertical-align:middle;margin-right:6px;overflow:hidden}
+.mini>i{display:block;height:100%;background:var(--done)}
+@media (max-width:600px){.hide-sm{display:none}}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);max-width:560px;width:calc(100% - 32px)}
+dialog input{width:100%;font:inherit;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>AIDA Content-Planer</h1>
+    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-tag" aria-selected="true">Tag</button>
+    <button role="tab" id="tab-alle" aria-selected="false">Alle Tage</button>
+  </div>
+  <button id="btn-settings" title="Einstellungen">⚙ Ordner</button>
+  <button id="btn-theme" title="Hell/Dunkel">◐</button>
+</header>
+
+<main>
+  <section id="view-tag">
+    <div class="nav">
+      <button id="prev">‹ Zurück</button>
+      <button id="today" class="primary">Heute</button>
+      <button id="next">Weiter ›</button>
+      <input type="date" id="pick" aria-label="Datum wählen">
+    </div>
+    <div class="hero" id="hero"></div>
+    <div class="grid">
+      <div class="card"><h3>🎯 Tagesziele <span class="count" id="c-ziele"></span></h3><ul class="check" id="l-ziele"></ul></div>
+      <div class="card"><h3>📣 Marketing-Aufgaben <span class="count" id="c-aufg"></span></h3>
+        <ul class="check" id="l-aufg"></ul>
+        <div id="routine-wrap"><div class="sub-h">Tagesroutine</div><ul class="check" id="l-routine"></ul></div>
+        <form class="add" id="f-add"><input id="i-add" placeholder="Eigene Aufgabe für diesen Tag …"><button>+</button></form>
+      </div>
+      <div class="card full">
+        <h3>🎬 Hooks für heute <span class="count" id="c-hooks"></span></h3>
+        <div class="note">Material zu jedem Hook (Videos, Fotos, Sprachnotizen) kommt in den angezeigten Ordner. Die Datei <code>hook.md</code> darin enthält Hook-Text und Shotliste für die Weiterverarbeitung durch Claude.</div>
+        <div class="path" style="margin-top:10px"><code id="dayfolder"></code><button id="copy-day">Pfad kopieren</button><button id="copy-ps" title="PowerShell-Befehl, der alle Ordner dieses Tages samt hook.md anlegt">Ordner-Befehl kopieren</button></div>
+        <div id="l-hooks"></div>
+        <div class="rule">Hinweis aus der Buchung: Der Reisepreis beruht auf Sonderkonditionen, über die Stillschweigen zu bewahren ist. Deshalb in keinem Hook den Preis nennen.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-alle" hidden>
+    <table>
+      <thead><tr><th>Datum</th><th>Tag</th><th>Ort</th><th class="hide-sm">Hooks</th><th>Fortschritt</th></tr></thead>
+      <tbody id="t-alle"></tbody>
+    </table>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <form method="dialog">
+    <h3 style="margin-top:0">Hauptordner für Material</h3>
+    <p class="note">Alle Tages- und Hook-Ordner liegen darunter, z. B. <code>…\2026-11-20_kapstadt\01_tag-1-von-31</code>.</p>
+    <input id="i-base">
+    <p style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:0">
+      <button value="cancel">Abbrechen</button><button value="ok" class="primary" id="save-base">Speichern</button>
+    </p>
+  </form>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+// "§" am Anfang = Angabe stammt aus der Buchungsbestätigung (PDF), sonst Vorschlag.
+const DEFAULT_BASE = 'Desktop\\AIDA-Content';
+const TRIP_START = '2026-11-20', TRIP_END = '2026-12-21';
+
+const ROUTINE = [
+  'Material des Tages in die Hook-Ordner verschieben (Videos, Fotos, Sprachnotizen)',
+  'Pro Hook kurz in hook.md notieren: was gedreht wurde, beste Clips',
+  'Story-Serie des Tages posten (3–5 Slides)',
+  'Kommentare & DMs beantworten, Reiseanfragen notieren',
+  'Backup: Speicherkarte → SSD'
+];
+
+const PLAN = [
+ {von:'2026-10-25',bis:'2026-11-01',typ:'prep',ort:'Vorbereitung 1',land:'Formalitäten & Ankündigung',slug:'vorbereitung-1',
+  ziele:['Alle Pflicht-Formalitäten aus der Buchung angestoßen','Reise auf Social Media angekündigt'],
+  aufgaben:['§Schiffsmanifest auf aida.de/myaida für beide Reisenden ausfüllen (Pflicht)',
+   '§Reisepässe prüfen: mind. 6 Monate über Reiseende (21.12.2026) gültig, genug freie Seiten',
+   '§Sri Lanka: Transitvisum auf immigration.gov.lk beantragen und ausdrucken – ohne Ausdruck keine Einschiffung',
+   '§Ab ca. 30.10.: AIDA-Tickets per E-Mail bzw. im myAIDA Urlaubsplaner prüfen',
+   '§Reiseversicherungen prüfen (Rücktritt, Auslandsreisekrankenversicherung)',
+   'Profil-Bio und Highlights auf „31 Tage Kapstadt → Bangkok“ vorbereiten'],
+  hooks:[['Ankündigung','Ich bin 31 Tage auf einem Kreuzfahrtschiff – von Kapstadt bis Bangkok. Und ich nehme euch jeden Tag mit.',['Gesicht in die Kamera, direkter Einstieg','Routenkarte (ohne persönliche Daten) abfilmen','Kalender mit 20.11. eingekreist']],
+   ['Route in 30 Sekunden','9 Länder, 31 Tage, ein Schiff – das ist die Route.',['Karte abfahren: Kapstadt → Mauritius → Seychellen → Malediven → Sri Lanka → Singapur → Bangkok','Flaggen/Ortsnamen als Text-Overlay']],
+   ['Der Ausdruck, den keiner auf dem Schirm hat','Ohne diesen Zettel darfst du in Kapstadt gar nicht erst aufs Schiff.',['Bildschirmaufnahme immigration.gov.lk (keine Passdaten zeigen)','Ausdruck in der Hand, in Dokumentenmappe stecken']]]},
+ {von:'2026-11-02',bis:'2026-11-12',typ:'prep',ort:'Vorbereitung 2',land:'Technik, Gesundheit & Packen',slug:'vorbereitung-2',
+  ziele:['Einreise Seychellen und Gesundheit geklärt','Content-Technik komplett und getestet'],
+  aufgaben:['§Seychellen: digitale Einreisegenehmigung über seychelles.govtas.com oder E-Border-App (vor Reisebeginn, ca. 24 h Bearbeitung)',
+   '§Singapur: eigene Medikamente auf hsa.gov.sg/personal-medication prüfen (teils Einfuhrerlaubnis nötig)',
+   '§Impfberatung/Tropenarzt: u. a. Hepatitis A empfohlen; Mückenschutz wegen Dengue/Chikungunya/Malaria einpacken',
+   '§Internet an Bord klären: inklusive ist nur der Onboard Chat – Uploads per Internetpaket oder in den Häfen planen',
+   'Technik: Speicherkarten, Powerbank, Mikrofon, Backup-SSD, Ladegeräte, Reiseadapter',
+   'Shotlisten für die Seetage vorbereiten (B-Roll an Bord)'],
+  hooks:[['Packliste für 31 Tage','31 Tage, ein Koffer, zwei Kontinente – das kommt mit.',['Flatlay vom offenen Koffer','Zeitraffer beim Packen','Close-ups: Mückenspray, Pass-Mappe, Adapter']],
+   ['Mein Content-Setup','Mit diesem Setup drehe ich 31 Tage Reise-Content – ohne Laptop-Chaos.',['Alle Geräte auf dem Tisch ausbreiten','Kurz jedes Teil zeigen und benennen']],
+   ['Mückenschutz ist Pflicht','In 8 von 9 Ländern dieser Route warnen die Einreisehinweise vor Dengue-Fieber.',['Text-Overlay mit den Ländern','Mückenspray und helle Kleidung zeigen']]]},
+ {von:'2026-11-13',bis:'2026-11-19',typ:'prep',ort:'Countdown',land:'Letzte Woche vor Abfahrt',slug:'countdown',
+  ziele:['Dokumentenmappe komplett','Countdown-Content läuft täglich'],
+  aufgaben:['§Mauritius: Formular auf safemauritius.govmu.org ausfüllen (QR-Code), alternativ Karte vor Ort',
+   '§Südafrika: freiwillige Reiseanmeldung auf sars.gov.za/travellerdeclaration',
+   '§Ausflüge, Spa-Termine und Restaurants im myAIDA Urlaubsportal reservieren',
+   '§Dokumentenmappe: Pässe, Sri-Lanka-Visum (Ausdruck), AIDA-Tickets, Rückflugticket, Versicherungsnachweis',
+   '§Rückflug ab Bangkok prüfen: nach Anlegen mind. 2 Std. für die Passkontrolle einplanen',
+   'Ordnerstruktur in diesem Ordner prüfen, Speicherkarten formatieren'],
+  hooks:[['Countdown','Noch 7 Tage. Dann geht es für 31 Tage aufs Meer.',['Tägliche Countdown-Zahl als Opener','Kurzer Clip aus den Vorbereitungen']],
+   ['Diese Formulare vor der Kreuzfahrt','Fünf Online-Formulare musst du vor oder während dieser Kreuzfahrt ausfüllen – sonst gibt es Ärger am Hafen.',['Liste: Sri Lanka, Seychellen, Malediven, Malaysia, Singapur, Thailand','Reisebüro-Tipp am Ende: „Fragt uns, wir helfen“']],
+   ['Warum Kreuzfahrt statt Rundreise?','Neun Länder, aber nur einmal Koffer auspacken – deshalb mache ich diese Reise per Schiff.',['Auspacken im Hotel vs. Kabine als Gegenüberstellung','Route kurz einblenden']]]},
+
+ {d:'2026-11-20',typ:'hafen',ort:'Kapstadt',land:'Südafrika',
+  ziele:['Einschiffung entspannt dokumentieren','Erste Eindrücke vom Schiff festhalten','Story „Tag 1/31“ live'],
+  aufgaben:['Check-in-Ablauf filmen (keine Bordkarten-/Passdaten zeigen)','Kabine filmen, bevor die Koffer ausgepackt sind','Erste Story-Serie posten'],
+  hooks:[['Tag 1 von 31','Heute startet meine 31-Tage-Kreuzfahrt – und das ist der erste Blick auf unser Schiff.',['AIDAstella am Kai, Tafelberg im Hintergrund','Gang über die Gangway (POV)','Erster Blick vom Außendeck']],
+   ['Roomtour Meerblickkabine','So sieht eine Meerblickkabine aus, in der man 31 Tage wohnt.',['Tür öffnen als Einstieg','Fenster mit Meerblick','Bad, Stauraum, Bett']],
+   ['Übernachtung in Kapstadt','Das Beste an dieser Route: Wir bleiben über Nacht in Kapstadt.',['Abendlicht über der Waterfront vom Deck','Stadtlichter im Zeitraffer']]]},
+ {d:'2026-11-21',typ:'hafen',ort:'Kapstadt',land:'Südafrika',
+  ziele:['Kapstadt-Highlight drehen','Erstes Reel posten'],
+  aufgaben:['Landgang planen, Alle-an-Bord-Zeit notieren','Reel „Tag 1“ schneiden und posten','Kommentare aus Tag 1 beantworten'],
+  hooks:[['Kapstadt in einem Tag','Du hast nur einen Tag in Kapstadt? Genau das würde ich machen.',['3–4 Spots schnell hintereinander','Uhrzeit-Overlay pro Spot']],
+   ['Tafelberg','Diese Aussicht bekommst du nur, wenn das Wetter mitspielt.',['Weg nach oben bzw. Seilbahn','360°-Schwenk oben']],
+   ['Kapstadt als Starthafen','Warum Kapstadt der perfekte Startpunkt für eine lange Kreuzfahrt ist.',['Reisebüro-Perspektive in die Kamera','B-Roll Hafen und Schiff']]]},
+ {d:'2026-11-22',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['Bordleben zeigen','Kapstadt-Material sortieren'],
+  aufgaben:['Kapstadt-Ordner prüfen: alles abgelegt?','Reel „Kapstadt in einem Tag“ posten'],
+  hooks:[['Erster Seetag','Erster Seetag: Was macht man eigentlich den ganzen Tag auf einem Schiff?',['Tagesablauf in 8 schnellen Clips','Frühstück → Deck → Pool → Abendshow']],
+   ['Was im Tarif drin ist','Vollpension, Getränke am Buffet, Wasser auf der Kabine – das ist bei dieser Reise inklusive.',['Buffet-Restaurant','Wasserflaschen in der Kabine','Hinweis: Preise nicht nennen']]]},
+ {d:'2026-11-23',typ:'hafen',ort:'Port Elizabeth',land:'Südafrika',
+  ziele:['Unbekannteren Hafen vorstellen','Ausflug filmen'],
+  aufgaben:['Ausflug/Landgang filmen','Story mit Umfrage: „Kanntet ihr Port Elizabeth?“'],
+  hooks:[['Port Elizabeth kennt kaum jemand','Diesen Hafen in Südafrika kennt kaum jemand – zu Unrecht.',['Hafeneinfahrt vom Deck','Strand/Promenade','Drei Dinge, die man hier machen kann']],
+   ['Safari vom Kreuzfahrthafen','Kann man von einem Kreuzfahrthafen aus auf Safari gehen? Heute probiere ich es.',['Abfahrt Ausflugsbus','Tiere aus dem Fahrzeug','Fazit in die Kamera']]]},
+ {d:'2026-11-24',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['Serie „4 Seetage am Stück“ starten','Fitness-Content'],
+  aufgaben:['Reel Port Elizabeth posten','Seetag-Serie in Story ankündigen'],
+  hooks:[['4 Seetage am Stück','Vier Seetage am Stück – wird das langweilig? Ich zeige es euch ehrlich.',['Countdown 1/4','Blick aufs offene Meer']],
+   ['Fitness auf See','So trainiert man auf einem Schiff mitten im Indischen Ozean.',['Fitnessraum mit Meerblick','Sportdeck']]]},
+ {d:'2026-11-25',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['Food-Content','Sonnendeck-Vergleich'],
+  aufgaben:['Seetag-Serie Teil 2 posten'],
+  hooks:[['Was isst man 31 Tage lang?','Was isst man eigentlich 31 Tage lang auf einem Kreuzfahrtschiff?',['Buffet-Rundgang','Eigener Teller morgens/mittags/abends']],
+   ['Sonnendeck 7 Uhr vs. 14 Uhr','Das Sonnendeck um 7 Uhr morgens – und um 14 Uhr.',['Gleiche Kameraposition, zwei Uhrzeiten','Split-Screen']]]},
+ {d:'2026-11-26',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['FAQ-Content','Zeitraffer drehen'],
+  aufgaben:['Fragen aus den DMs sammeln für Q&A'],
+  hooks:[['Wird man seekrank?','Die Frage, die mir alle stellen: Wird man auf so einer langen Fahrt seekrank?',['Ehrliche Antwort in die Kamera','Wellen-B-Roll']],
+   ['Nichts als Wasser','So sieht ein Tag im Indischen Ozean aus: 360 Grad nur Wasser.',['Zeitraffer Sonnenaufgang bis -untergang','Ruhige Musik']]]},
+ {d:'2026-11-27',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['Einreise Réunion/Mauritius vorbereitet','Behind-the-Scenes-Content'],
+  aufgaben:['§Mauritius-Formular (safemauritius.govmu.org) erledigt? QR-Code bereithalten','§Mauritius: Rückflugticket und Nachweis finanzieller Mittel (mind. 100 USD p. P./Tag) griffbereit'],
+  hooks:[['Mein Workflow auf See','So produziere ich jeden Tag Content – mitten auf dem Ozean.',['Schreibtisch in der Kabine','Ordnerstruktur am Handy/Laptop zeigen']],
+   ['Einreise Mauritius','Vor Mauritius musst du ein Online-Formular ausfüllen – so geht es in 2 Minuten.',['Bildschirmaufnahme ohne persönliche Daten','QR-Code-Ergebnis (verpixelt)']]]},
+ {d:'2026-11-28',typ:'hafen',ort:'Le Port',land:'La Réunion',
+  ziele:['Réunion als „Frankreich im Indischen Ozean“ zeigen','Landschaft filmen'],
+  aufgaben:['Landgang filmen','Story: „Wusstet ihr, dass Réunion zur EU gehört?“'],
+  hooks:[['Euro im Indischen Ozean','Hier zahlst du mit Euro – mitten im Indischen Ozean.',['Euro-Münzen/Preisschild','Französische Straßenschilder']],
+   ['Vulkaninsel Réunion','Diese Insel ist eine der spektakulärsten Landschaften auf der ganzen Route.',['Berge/Küste','Drohnenfreier Panoramaschwenk']]]},
+ {d:'2026-11-29',typ:'hafen',ort:'Port Louis',land:'Mauritius',
+  ziele:['Mauritius Tag 1 drehen','Strand-Content'],
+  aufgaben:['Reel Réunion posten','Plan für 2 Tage Mauritius in der Story zeigen'],
+  hooks:[['2 Tage Mauritius','Zwei Tage Mauritius vom Schiff aus – das ist mein Plan.',['Hafeneinfahrt Port Louis','Plan als Text-Overlay']],
+   ['Strand oder Stadt?','Strand oder Stadt – was lohnt sich auf Mauritius mehr?',['Split: Markt Port Louis vs. Strand','Meinung in die Kamera']]]},
+ {d:'2026-11-30',typ:'hafen',ort:'Port Louis',land:'Mauritius',
+  ziele:['Mauritius Tag 2 drehen','Ausflug vergleichen'],
+  aufgaben:['Mauritius-Ordner vollständig?'],
+  hooks:[['Ausflug buchen oder auf eigene Faust?','Kreuzfahrt-Ausflug oder auf eigene Faust – was ist auf Mauritius besser?',['Pro/Contra als Overlay','Reisebüro-Tipp']],
+   ['Mauritius in 15 Sekunden','Mauritius in 15 Sekunden.',['Schnellschnitt der schönsten Clips beider Tage']]]},
+ {d:'2026-12-01',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['Saison-Content (Dezember)','Mauritius-Reels posten'],
+  aufgaben:['§Seychellen-Einreisegenehmigung vorhanden? (vor Reisebeginn beantragt)','Reel Mauritius posten'],
+  hooks:[['Sommer statt Weihnachtsstress','Während in Deutschland die Weihnachtsmärkte öffnen, sieht mein Dezember so aus.',['Kontrast-Schnitt: Winterbild vs. Pooldeck']],
+   ['Onboard Chat','So bleiben wir an Bord in Kontakt – ohne teures Internet.',['Handy mit Chat (ohne Inhalte)','§Onboard Chat ist im Tarif inklusive']]]},
+ {d:'2026-12-02',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['Persönlicher Zwischenstand','Abend-Content'],
+  aufgaben:['Seychellen-Shotliste vorbereiten'],
+  hooks:[['Nach knapp 2 Wochen Kreuzfahrt','Das habe ich nach knapp zwei Wochen auf dem Schiff gelernt.',['3 Learnings mit Text-Overlay']],
+   ['Abends an Bord','So sieht ein Abend an Bord aus – Show, Bar, Sonnenuntergang.',['Theater/Show (falls Filmen erlaubt)','Bar, Deck bei Nacht']]]},
+ {d:'2026-12-03',typ:'hafen',ort:'Mahé',land:'Seychellen',
+  ziele:['Seychellen-Postkartenmotive drehen','Einreise-Tipp liefern'],
+  aufgaben:['§Einreisegenehmigung Seychellen bereithalten','Landgang filmen'],
+  hooks:[['Wie auf der Postkarte?','Sehen die Seychellen wirklich so aus wie auf den Postkarten?',['Erwartung (Postkarte) vs. Realität (eigener Clip)']],
+   ['Ohne diese App kein Landgang','Für die Seychellen brauchst du vorab eine digitale Einreisegenehmigung – so funktioniert es.',['App/Website zeigen (ohne Daten)','Bearbeitung ca. 24 Std. als Overlay']]]},
+ {d:'2026-12-04',typ:'hafen',ort:'La Digue',land:'Seychellen',reede:true,
+  ziele:['Tender-Ablauf zeigen','Ikonischen Strand drehen'],
+  aufgaben:['§Reedehafen möglich: Tenderzeiten an Bord prüfen','Wasserdichte Hülle für das Handy mitnehmen'],
+  hooks:[['Mit dem Tenderboot an Land','Hier gibt es keinen Hafen für unser Schiff – so kommen wir trotzdem an Land.',['Tenderboot einsteigen','Blick zurück aufs Schiff']],
+   ['Einer der schönsten Strände der Welt','Dieser Strand gilt als einer der schönsten der Welt. Ich zeige euch, ob das stimmt.',['Granitfelsen + Wasser','Langsamer Schwenk']],
+   ['Insel ohne Autos','Auf dieser Insel fährt man Fahrrad statt Auto.',['POV Fahrradfahrt','Klingel-Sound als Hook-Effekt']]]},
+ {d:'2026-12-05',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['Halbzeit feiern','Seychellen-Reels posten'],
+  aufgaben:['§Malediven: Formular travel.immigration.gov.mv innerhalb von 96 Std. vor Ankunft (08.12.) – ab heute möglich','Reel Seychellen posten'],
+  hooks:[['Halbzeit!','Halbzeit: 16 von 31 Tagen. Das waren meine Highlights bisher.',['Best-of der ersten Hälfte in 15 Sekunden']],
+   ['Kabinen-Hacks','Drei Kabinen-Hacks, die eine lange Kreuzfahrt viel angenehmer machen.',['Ordnung im Schrank','Ladestation','Kleinkram-Organisation']]]},
+ {d:'2026-12-06',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['Wellness-Content','Zeitraffer'],
+  aufgaben:['§Malediven-Formular erledigt?'],
+  hooks:[['Wellness auf See','Ein Seetag im Spa – so sieht Erholung mitten im Ozean aus.',['Spa-Bereich (wenn erlaubt)','Ruhige Detailaufnahmen']],
+   ['Sonnenuntergang auf See','Kein Land in Sicht – nur dieser Sonnenuntergang.',['Zeitraffer vom Deck']]]},
+ {d:'2026-12-07',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['Community-Q&A','Malediven vorbereiten'],
+  aufgaben:['Fragen aus den DMs auswählen','Malediven-Shotliste'],
+  hooks:[['Q&A nach 18 Tagen','Ihr habt gefragt – ich antworte: 18 Tage auf einem Kreuzfahrtschiff.',['Fragen als Text-Sticker, Antworten in die Kamera']],
+   ['Morgen Malediven','Morgen sind wir auf den Malediven – das muss vorher erledigt sein.',['§Formular 96 Std. vorher, Visum bei Ankunft']]]},
+ {d:'2026-12-08',typ:'hafen',ort:'Malé',land:'Malediven',reede:true,
+  ziele:['Malediven abseits der Luxus-Resorts zeigen','Wasser-Content'],
+  aufgaben:['§Reedehafen möglich: Tenderzeiten prüfen','§Visum bei Ankunft – Rückflugticket/Unterkunftsnachweis griffbereit'],
+  hooks:[['Malediven ohne Wasserbungalow','Malediven ohne Wasserbungalow – geht das? Ja, mit dem Kreuzfahrtschiff.',['Türkises Wasser vom Tender','Gegenüberstellung Resort-Klischee']],
+   ['Malé – die Hauptstadt, die keiner zeigt','Alle zeigen die Resorts. Ich zeige euch die Hauptstadt Malé.',['Straßen, Markt, Moschee von außen']]]},
+ {d:'2026-12-09',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
+  ziele:['Malediven-Fazit','Sri Lanka vorbereiten'],
+  aufgaben:['§Sri-Lanka-Transitvisum (Ausdruck) bereitlegen','Reel Malediven posten'],
+  hooks:[['Malediven-Fazit','Lohnt sich ein Tag Malediven auf einer Kreuzfahrt? Mein ehrliches Fazit.',['Fazit in die Kamera, Clips dazwischen']],
+   ['Einreise Sri Lanka','Für Sri Lanka brauchst du schon vor der Kreuzfahrt ein Visum – und zwar ausgedruckt.',['Ausdruck zeigen (Daten abdecken)','§Transitvisum für bis zu 48 Std.']]]},
+ {d:'2026-12-10',typ:'hafen',ort:'Colombo',land:'Sri Lanka',
+  ziele:['Großstadt-Energie einfangen','Tuk-Tuk-Content'],
+  aufgaben:['Landgang filmen','Mückenschutz nicht vergessen'],
+  hooks:[['Colombo an einem Tag','Ein Tag in Colombo – so viel schafft man vom Kreuzfahrtschiff aus.',['Schnelle Stationen mit Uhrzeit-Overlay']],
+   ['Tuk-Tuk-Fahrt','Mein erstes Tuk-Tuk in Sri Lanka – haltet euch fest.',['POV aus dem Tuk-Tuk','Reaktion']]]},
+ {d:'2026-12-11',typ:'hafen',ort:'Hambantota',land:'Sri Lanka',
+  ziele:['Natur-/Safari-Content Sri Lanka'],
+  aufgaben:['Ausflug filmen','Sri-Lanka-Ordner vollständig?'],
+  hooks:[['Sri Lanka Tag 2','Gestern Großstadt, heute Natur – Sri Lanka hat zwei Gesichter.',['Kontrast-Schnitt Colombo vs. Hambantota']],
+   ['Elefanten vom Kreuzfahrtschiff aus','Von diesem Hafen aus kommst du zu wilden Elefanten.',['Safari-Clips','Fazit']]]},
+ {d:'2026-12-12',typ:'see',ort:'Erholung auf See',land:'Golf von Bengalen',
+  ziele:['Asien-Etappe ankündigen','Reisebüro-Expertise zeigen'],
+  aufgaben:['§Malaysia: MDAC-Formular (imigresen-online.imi.gov.my/mdac) innerhalb von 72 Std. vor Einreise (15.12.)','Reel Sri Lanka posten'],
+  hooks:[['Was 3 Wochen Kreuzfahrt mit dir machen','Was drei Wochen Kreuzfahrt mit dir machen.',['Vorher/Nachher-Stimmung, humorvoll']],
+   ['Für wen ist so eine lange Kreuzfahrt?','Für wen ist eine 31-Tage-Kreuzfahrt eigentlich etwas? Ehrliche Einschätzung aus dem Reisebüro.',['3 Typen als Text-Overlay','Call-to-Action: Fragen per DM']]]},
+ {d:'2026-12-13',typ:'see',ort:'Erholung auf See',land:'Andamanensee',
+  ziele:['Formular-Überblick liefern','Behind the Scenes'],
+  aufgaben:['§MDAC Malaysia erledigt?'],
+  hooks:[['Die Asien-Formulare im Überblick','Malaysia, Singapur, Thailand: Drei Länder, drei Online-Formulare – mit Fristen.',['§Malaysia 72 Std., Singapur 72 Std., Thailand 3 Tage vorher']],
+   ['Schnitt auf See','Behind the Scenes: So schneide ich meine Videos auf dem Schiff.',['Bildschirm mit Timeline','Kabine/Deck als Arbeitsplatz']]]},
+ {d:'2026-12-14',typ:'see',ort:'Erholung auf See',land:'Andamanensee',
+  ziele:['Mythen-Content','Penang vorbereiten'],
+  aufgaben:['§Singapur: SG Arrival Card (eservices.ica.gov.sg/sgarrivalcard) innerhalb von 72 Std. vor Einreise (17.12.)'],
+  hooks:[['Kreuzfahrt-Mythen','Drei Kreuzfahrt-Mythen – und was nach 25 Tagen davon stimmt.',['Mythos als Text, Antwort in die Kamera']],
+   ['Letzte Abende auf See','Nur noch wenige Abende an Bord – so genieße ich sie.',['Abendstimmung Deck']]]},
+ {d:'2026-12-15',typ:'hafen',ort:'Penang',land:'Malaysia',reede:true,
+  ziele:['Street-Art und Street-Food drehen'],
+  aufgaben:['§Reedehafen möglich: Tenderzeiten prüfen','§Pass mit zwei freien gegenüberliegenden Seiten'],
+  hooks:[['Street Art in George Town','In dieser Stadt ist die ganze Altstadt eine Galerie.',['Wandbilder + man selbst im Bild']],
+   ['Street Food Penang','Penang gilt als Street-Food-Hauptstadt Malaysias – ich teste es.',['Garküche, Probieren, Reaktion']]]},
+ {d:'2026-12-16',typ:'hafen',ort:'Port Klang',land:'Malaysia',
+  ziele:['Kuala-Lumpur-Ausflug drehen'],
+  aufgaben:['§Thailand: Digital Arrival Card (tdac.immigration.go.th) innerhalb von 3 Tagen vor Ankunft (19.12.) – ab heute','Ausflug filmen'],
+  hooks:[['Kuala Lumpur vom Hafen aus','Lohnt sich der Weg vom Hafen nach Kuala Lumpur? Ich habe es getestet.',['Fahrt','Ankunft Skyline','Fazit']],
+   ['Petronas Towers','Diese Türme wollte ich schon immer einmal sehen.',['Low-Angle-Shot nach oben','Abendlicht falls möglich']]]},
+ {d:'2026-12-17',typ:'hafen',ort:'Singapur',land:'Singapur',
+  ziele:['Singapur-Highlights in einem Tag'],
+  aufgaben:['§SG Arrival Card vorzeigen können','§Medikamente: Einfuhrregeln beachten'],
+  hooks:[['Singapur an einem Tag','Singapur an einem Tag – das ist machbar, wenn du so planst.',['Stationen mit Uhrzeit-Overlay']],
+   ['Medikamente nach Singapur','Achtung: Manche ganz normalen Medikamente brauchen in Singapur eine Genehmigung.',['§Hinweis hsa.gov.sg','Reisebüro-Tipp']]]},
+ {d:'2026-12-18',typ:'see',ort:'Erholung auf See',land:'Golf von Thailand',
+  ziele:['Abschied vom Bordleben','Abreise vorbereiten'],
+  aufgaben:['§Thailand Digital Arrival Card erledigt?','§Rückflug: 2 Std. Passkontrolle in Bangkok/Laem Chabang einplanen','Gepäck- und Ausschiffungsinfos an Bord prüfen'],
+  hooks:[['Letzter Seetag','Der letzte Seetag nach 29 Tagen – und so fühlt es sich an.',['Ruhige Clips, persönlicher Voice-over']],
+   ['Was ich vermissen werde','Fünf Dinge, die ich an Bord vermissen werde.',['Je ein Clip pro Punkt']]]},
+ {d:'2026-12-19',typ:'hafen',ort:'Ko Samui',land:'Thailand',reede:true,
+  ziele:['Thailand-Inselgefühl einfangen'],
+  aufgaben:['§Reedehafen möglich: Tenderzeiten prüfen','Strand-/Insel-Clips drehen'],
+  hooks:[['Ko Samui per Tenderboot','Willkommen in Thailand – mit dem Tenderboot nach Ko Samui.',['Tenderfahrt','Erster Schritt an Land']],
+   ['Thailand-Inselgefühl','Das ist Thailand, wie man es sich vorstellt.',['Palmen, Strand, Long-Tail-Boote']]]},
+ {d:'2026-12-20',typ:'hafen',ort:'Bangkok / Laem Chabang',land:'Thailand',
+  ziele:['Bangkok-Ausflug oder Hafenumgebung drehen','Letzter Abend an Bord'],
+  aufgaben:['Koffer packen, Material sichern','Abschieds-Story'],
+  hooks:[['Bangkok vom Kreuzfahrthafen','Der Hafen heißt „Bangkok“ – liegt aber gar nicht in Bangkok. Das musst du wissen.',['Karte/Weg zeigen','Reisebüro-Tipp']],
+   ['Letzter Abend an Bord','Letzter Abend an Bord nach 31 Tagen.',['Sonnenuntergang, Abschied vom Deck']]]},
+ {d:'2026-12-21',typ:'hafen',ort:'Bangkok / Laem Chabang',land:'Thailand',
+  ziele:['Ausschiffung dokumentieren','Komplettes Material gesichert'],
+  aufgaben:['§Mind. 2 Std. für die Passkontrolle nach Anlegen einplanen (Pässe ca. 2 Std. nach Ankunft abholbereit)','Alle Ordner vollständig? Backup doppelt prüfen'],
+  hooks:[['31 Tage in 60 Sekunden','31 Tage, 9 Länder, ein Schiff – in 60 Sekunden.',['Best-of aus allen Ordnern (Auswahl später mit Claude)']],
+   ['Würde ich es wieder machen?','31 Tage Kreuzfahrt – würde ich es wieder machen? Mein ehrliches Fazit.',['Fazit in die Kamera am Hafen']]]},
+
+ {von:'2026-12-22',bis:'2026-12-31',typ:'prep',ort:'Nachbereitung',land:'Recap & Anfragen',slug:'nachbereitung',
+  ziele:['Gesamtes Material für Claude übergeben','Best-of-Content veröffentlicht'],
+  aufgaben:['Ordner durchgehen: jede hook.md mit Notizen ergänzt?','Claude bitten, die Ordner zu sichten und Reels zu planen','Reiseanfragen aus den DMs nachfassen'],
+  hooks:[['Die 3 schönsten Häfen','Die drei schönsten Häfen von Kapstadt bis Bangkok – Platz 1 hat mich überrascht.',['Ranking mit Clips aus den Tagesordnern']],
+   ['Für wen ich diese Route buchen würde','Für wen ich diese Route als Reisebüro empfehlen würde – und für wen nicht.',['Reisebüro-Perspektive, Call-to-Action']]]}
+];
+
+// --- Hilfsfunktionen ---
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,'0');
+const iso = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); };
+const addDays = (s,n) => { const d = parse(s); d.setDate(d.getDate()+n); return iso(d); };
+const diffDays = (a,b) => Math.round((parse(b)-parse(a))/864e5);
+const fmt = s => parse(s).toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+const esc = s => s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function slug(s){
+  return s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40).replace(/-$/,'');
+}
+const load = (k,f) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch(e){ return f; } };
+const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+
+PLAN.forEach(e => {
+  if (e.d) { e.von = e.bis = e.d; e.slug = slug(e.ort); e.tag = diffDays(TRIP_START, e.d) + 1; }
+  e.folder = e.von + '_' + e.slug;
+  e.hooks = e.hooks.map((h,i) => ({titel:h[0], text:h[1], shots:h[2], folder: pad(i+1)+'_'+slug(h[0])}));
+});
+
+let done = load('acp.done', {});
+let custom = load('acp.custom', {});
+let base = load('acp.base', DEFAULT_BASE);
+let theme = load('acp.theme', null);
+if (theme) document.documentElement.dataset.theme = theme;
+
+const todayIso = iso(new Date());
+const urlDate = new URLSearchParams(location.search).get('datum');
+let cur = urlDate || todayIso;
+
+function entryFor(date){
+  if (date < PLAN[0].von) return PLAN[0];
+  return PLAN.find(e => e.von <= date && date <= e.bis) || PLAN[PLAN.length-1];
+}
+const key = (e,kind,i) => e.von+'|'+kind+'|'+i;
+const routineKey = (date,i) => date+'|r|'+i;
+const winPath = (...p) => [base.replace(/\\+$/,''), ...p].join('\\');
+
+function itemsOf(e, date){
+  const list = [];
+  e.ziele.forEach((_,i)=>list.push(key(e,'z',i)));
+  e.aufgaben.forEach((_,i)=>list.push(key(e,'a',i)));
+  e.hooks.forEach((_,i)=>list.push(key(e,'h',i)));
+  (custom[e.von]||[]).forEach((c)=>list.push(key(e,'c',c.id)));
+  if (e.typ !== 'prep' && date) ROUTINE.forEach((_,i)=>list.push(routineKey(date,i)));
+  return list;
+}
+function progressOf(e){ const l = itemsOf(e, e.d); const n = l.filter(k=>done[k]).length; return [n,l.length]; }
+
+function textHtml(t){
+  const pdf = t.startsWith('§');
+  return esc(pdf ? t.slice(1) : t) + (pdf ? '<span class="tag" title="Angabe aus der Buchungsbestätigung">aus Buchung</span>' : '');
+}
+function checkLi(k, html, extra=''){
+  const c = done[k] ? 'checked' : '';
+  const id = 'cb-'+k.replace(/[^a-z0-9]/gi,'_');
+  return `<li class="${done[k]?'is-done':''}"><input type="checkbox" id="${id}" data-k="${k}" ${c}><label for="${id}">${html}</label>${extra}</li>`;
+}
+
+function renderDay(){
+  const e = entryFor(cur);
+  $('#pick').value = cur;
+  let label;
+  if (e.typ === 'prep') {
+    const until = diffDays(cur, TRIP_START);
+    label = until > 0 ? `Noch ${until} Tage bis zur Abfahrt` : 'Nach der Reise';
+  } else label = `Reisetag ${e.tag}`;
+  const range = e.von === e.bis ? fmt(e.von) : `${parse(e.von).toLocaleDateString('de-DE')} – ${parse(e.bis).toLocaleDateString('de-DE')}`;
+  const badges = [];
+  if (e.typ==='hafen') badges.push('<span class="badge">⚓ Hafentag</span>');
+  if (e.typ==='see') badges.push('<span class="badge">🌊 Seetag</span>');
+  if (e.typ==='prep') badges.push('<span class="badge">🧳 Phase</span>');
+  if (e.reede) badges.push('<span class="badge warn" title="Laut Buchung: Ankerplatz vor dem Hafen möglich, Boots-Shuttle zum Landgang">Reedehafen möglich · Tender</span>');
+  if (cur === todayIso) badges.push('<span class="badge">Heute</span>');
+  const [n,t] = progressOf(e);
+  $('#hero').innerHTML = `<div class="daylabel">${label}</div><h2>${esc(e.ort)}</h2>
+    <div class="meta">${esc(e.land)} · ${range}</div><div class="badges">${badges.join('')}</div>
+    <div class="progress"><div style="width:${t?Math.round(n/t*100):0}%"></div></div>
+    <div class="ptext">${n} von ${t} erledigt</div>`;
+
+  $('#l-ziele').innerHTML = e.ziele.map((z,i)=>checkLi(key(e,'z',i), textHtml(z))).join('');
+  $('#c-ziele').textContent = e.ziele.filter((_,i)=>done[key(e,'z',i)]).length+'/'+e.ziele.length;
+
+  const cust = custom[e.von]||[];
+  $('#l-aufg').innerHTML = e.aufgaben.map((a,i)=>checkLi(key(e,'a',i), textHtml(a))).join('')
+    + cust.map(c=>checkLi(key(e,'c',c.id), esc(c.text), `<button class="del" data-del="${c.id}" title="Löschen">✕</button>`)).join('');
+  const aKeys = e.aufgaben.map((_,i)=>key(e,'a',i)).concat(cust.map(c=>key(e,'c',c.id)));
+  $('#c-aufg').textContent = aKeys.filter(k=>done[k]).length+'/'+aKeys.length;
+
+  $('#routine-wrap').hidden = e.typ === 'prep';
+  $('#l-routine').innerHTML = e.typ==='prep' ? '' : ROUTINE.map((r,i)=>checkLi(routineKey(e.d,i), esc(r))).join('');
+
+  $('#dayfolder').textContent = winPath(e.folder);
+  $('#l-hooks').innerHTML = e.hooks.map((h,i)=>{
+    const k = key(e,'h',i), id='cb-'+k.replace(/[^a-z0-9]/gi,'_');
+    const p = winPath(e.folder, h.folder);
+    return `<div class="hook ${done[k]?'is-done':''}">
+      <div class="hook-head"><input type="checkbox" id="${id}" data-k="${k}" ${done[k]?'checked':''}>
+        <span class="num">${pad(i+1)}</span><label class="title" for="${id}">${esc(h.titel)}</label></div>
+      <blockquote>„${esc(h.text)}“</blockquote>
+      <ul class="shots">${h.shots.map(s=>'<li>'+textHtml(s)+'</li>').join('')}</ul>
+      <div class="path"><code>${esc(p)}\\</code><button data-copy="${esc(p)}">Pfad kopieren</button></div>
+    </div>`;
+  }).join('');
+  $('#c-hooks').textContent = e.hooks.filter((_,i)=>done[key(e,'h',i)]).length+'/'+e.hooks.length+' erledigt';
+}
+
+function renderAll(){
+  const cE = entryFor(todayIso);
+  $('#t-alle').innerHTML = PLAN.map(e=>{
+    const [n,t] = progressOf(e);
+    const when = e.von===e.bis ? parse(e.von).toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'})
+      : parse(e.von).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})+'–'+parse(e.bis).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
+    return `<tr class="row ${e===cE?'today':''}" data-go="${e.von}"><td>${when}</td><td>${e.tag||'–'}</td>
+      <td>${esc(e.ort)}${e.typ==='hafen'?' <span class="note">· '+esc(e.land)+'</span>':''}${e.reede?' ⚓':''}</td>
+      <td class="hide-sm">${e.hooks.length}</td>
+      <td><span class="mini"><i style="width:${t?Math.round(n/t*100):0}%"></i></span>${n}/${t}</td></tr>`;
+  }).join('');
+}
+
+function render(){ renderDay(); renderAll(); }
+
+// PowerShell-Befehl: legt Tages- und Hook-Ordner samt hook.md an (vorhandene Dateien bleiben unverändert)
+function psFor(entries){
+  const q = s => s.replace(/'/g,"''");
+  const out = ['$enc = New-Object System.Text.UTF8Encoding($false)'];
+  entries.forEach(e=>{
+    e.hooks.forEach((h,i)=>{
+      const dir = winPath(e.folder, h.folder);
+      const md = [`# Hook ${pad(i+1)}: ${h.titel}`, '',
+        `- Datum: ${e.von===e.bis ? fmt(e.von) : e.von+' bis '+e.bis}`,
+        `- Ort: ${e.ort} (${e.land})${e.reede?' – Reedehafen möglich':''}`,
+        `- Ordner: ${dir}`, '', '## Hook-Text', '', `> ${h.text}`, '', '## Shotliste', '',
+        ...h.shots.map(s=>'- '+(s.startsWith('§')?s.slice(1)+' (aus Buchung)':s)), '',
+        '## Notizen nach dem Dreh', '', '- Gedreht: ', '- Beste Clips: ', '- Status: offen', ''].join('\r\n');
+      out.push(`New-Item -ItemType Directory -Force -Path '${q(dir)}' | Out-Null`);
+      out.push(`if (-not (Test-Path '${q(dir)}\\hook.md')) { [IO.File]::WriteAllText('${q(dir)}\\hook.md', @'\r\n${md}\r\n'@, $enc) }`);
+    });
+  });
+  return out.join('\r\n');
+}
+window.psAll = () => psFor(PLAN);
+
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1600); }
+async function copy(text, msg){
+  try { await navigator.clipboard.writeText(text); }
+  catch(e){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+  toast(msg||'Kopiert');
+}
+
+// --- Events ---
+document.addEventListener('change', ev=>{
+  const k = ev.target.dataset && ev.target.dataset.k;
+  if (!k) return;
+  if (ev.target.checked) done[k]=true; else delete done[k];
+  save('acp.done', done); render();
+});
+document.addEventListener('click', ev=>{
+  const b = ev.target.closest('button,tr');
+  if (!b) return;
+  if (b.dataset.copy) copy(b.dataset.copy+'\\','Pfad kopiert');
+  if (b.dataset.del){ const e=entryFor(cur); custom[e.von]=(custom[e.von]||[]).filter(c=>String(c.id)!==b.dataset.del); delete done[key(e,'c',b.dataset.del)]; save('acp.custom',custom); save('acp.done',done); render(); }
+  if (b.dataset.go){ cur=b.dataset.go; showTab('tag'); render(); }
+});
+$('#f-add').addEventListener('submit', ev=>{
+  ev.preventDefault(); const v=$('#i-add').value.trim(); if(!v) return;
+  const e=entryFor(cur); (custom[e.von]=custom[e.von]||[]).push({id:Date.now(), text:v});
+  save('acp.custom',custom); $('#i-add').value=''; render();
+});
+function step(dir){
+  const e = entryFor(cur);
+  let d = dir>0 ? addDays(e.bis,1) : addDays(e.von,-1);
+  if (dir<0 && d < PLAN[0].von) d = PLAN[0].von;
+  if (dir>0 && d > PLAN[PLAN.length-1].bis) d = PLAN[PLAN.length-1].von;
+  cur = d;
+  render();
+}
+$('#prev').onclick=()=>step(-1);
+$('#next').onclick=()=>step(1);
+$('#today').onclick=()=>{ cur=todayIso; render(); };
+$('#pick').onchange=ev=>{ if(ev.target.value){ cur=ev.target.value; render(); } };
+$('#copy-day').onclick=()=>copy(winPath(entryFor(cur).folder)+'\\','Pfad kopiert');
+$('#copy-ps').onclick=()=>copy(psFor([entryFor(cur)]),'PowerShell-Befehl kopiert – in PowerShell einfügen');
+function showTab(t){
+  $('#view-tag').hidden = t!=='tag'; $('#view-alle').hidden = t!=='alle';
+  $('#tab-tag').setAttribute('aria-selected', t==='tag'); $('#tab-alle').setAttribute('aria-selected', t==='alle');
+}
+$('#tab-tag').onclick=()=>showTab('tag');
+$('#tab-alle').onclick=()=>showTab('alle');
+$('#btn-theme').onclick=()=>{
+  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  theme = dark ? 'light' : 'dark'; document.documentElement.dataset.theme = theme; save('acp.theme', theme);
+};
+$('#btn-settings').onclick=()=>{ $('#i-base').value=base; $('#dlg').showModal(); };
+$('#dlg').addEventListener('close', ()=>{
+  if ($('#dlg').returnValue==='ok'){ const v=$('#i-base').value.trim(); if(v){ base=v; save('acp.base',base); render(); toast('Ordner gespeichert'); } }
+});
+
+render();
+
+// Offline-Betrieb als Home-Bildschirm-App (nur über https bzw. localhost)
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>

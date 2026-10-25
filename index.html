@@ -122,7 +122,7 @@ dialog input{width:100%;font:inherit;padding:7px 9px;border-radius:8px;border:1p
 <header>
   <div>
     <h1>AIDA Content-Planer</h1>
-    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026</div>
+    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 3</span></div>
   </div>
   <div class="spacer"></div>
   <div class="tabs" role="tablist">
@@ -791,8 +791,17 @@ window.addEventListener('online', ()=>renderWetter());
 render();
 
 // Offline-Betrieb als Home-Bildschirm-App (nur über https bzw. localhost)
+// Eine neue Version wird beim Öffnen gesucht und die Seite danach einmal automatisch neu geladen.
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    if (hadController && !reloaded) { reloaded = true; location.reload(); }
+  });
+  navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});
+  document.addEventListener('visibilitychange', ()=>{
+    if (document.visibilityState === 'visible') navigator.serviceWorker.getRegistration().then(r=>r && r.update()).catch(()=>{});
+  });
 }
 </script>
 </body>

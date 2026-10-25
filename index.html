@@ -122,7 +122,7 @@ dialog input{width:100%;font:inherit;padding:7px 9px;border-radius:8px;border:1p
 <header>
   <div>
     <h1>AIDA Content-Planer</h1>
-    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 3</span></div>
+    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 4</span></div>
   </div>
   <div class="spacer"></div>
   <div class="tabs" role="tablist">
@@ -145,7 +145,7 @@ dialog input{width:100%;font:inherit;padding:7px 9px;border-radius:8px;border:1p
     <div class="grid">
       <div class="card full"><h3>🛂 Einreise &amp; Formulare <span class="count" id="c-einreise"></span></h3><div id="l-einreise"></div></div>
       <div class="card"><h3>🌤 Wetter</h3><div id="wetter"></div></div>
-      <div class="card" id="hafen-card"><h3>⚓ Hafen-Infos</h3><div id="hafen"></div></div>
+      <div class="card" id="hafen-card"><h3 id="hafen-title">⚓ Hafen-Infos</h3><div id="hafen"></div></div>
       <div class="card"><h3>🎯 Tagesziele <span class="count" id="c-ziele"></span></h3><div id="l-ziele"></div></div>
       <div class="card"><h3>📣 Marketing-Aufgaben <span class="count" id="c-aufg"></span></h3>
         <div id="l-aufg"></div>
@@ -198,18 +198,21 @@ const ROUTINE = [
 // Einreise-Formulare: geprüft beim Auswärtigen Amt (Stand 25.10.2026) und mit den AIDA-Hinweisen aus der Buchung abgeglichen.
 // ab = frühester sinnvoller Tag, bis = spätester Tag.
 const EINREISE = [
- {id:'lk',land:'Sri Lanka',was:'Visum (ETA) – Pflicht',ab:'2026-10-25',bis:'2026-11-19',
+ {id:'lk',land:'Sri Lanka',was:'Visum (ETA) – Pflicht',ab:'2026-10-25',bis:'2026-11-15',
   links:[['eta.gov.lk','https://www.eta.gov.lk'],['immigration.gov.lk','https://www.immigration.gov.lk']],
-  info:'AA: gebührenfreies Visum, vor Einreise über das ETA-Portal beantragen, nur die offizielle Seite nutzen, Passnummer genau prüfen (0 statt O). AIDA: Transitvisum über immigration.gov.lk, Ausdruck muss bei der Einschiffung vorliegen. Beide Quellen nennen unterschiedliche Portale – im Zweifel bei AIDA nachfragen, welches gilt. Für beide Reisenden.'},
- {id:'sc',land:'Seychellen',was:'Travel Authorisation (Einreisegenehmigung)',ab:'2026-10-25',bis:'2026-11-19',
-  links:[['seychelles.govtas.com','https://seychelles.govtas.com']],
-  info:'AA + AIDA: vor Reisebeginn beantragen, Bearbeitung ca. 24 Std., gebührenpflichtig. Benötigt: Reisepass, Passbild, Kontaktdaten, Kredit-/Debitkarte. Ohne Genehmigung kann die Einreise verweigert werden. Alternativ Seychelles E-Border-App.'},
- {id:'za',land:'Südafrika',was:'Traveller Declaration (freiwillig)',ab:'2026-10-25',bis:'2026-11-19',
-  links:[['sars.gov.za/travellerdeclaration','https://www.sars.gov.za/travellerdeclaration/']],
-  info:'AIDA: empfohlen, in der Pilotphase freiwillig. AA: Reisepass muss 30 Tage über die Ausreise hinaus gültig sein und mind. 2 freie Seiten haben. Kein Visum nötig.'},
- {id:'mu',land:'Mauritius',was:'Einreiseformular (All in One Travel Form, QR-Code)',ab:'2026-10-25',bis:'2026-11-19',
+  info:'Jetzt möglich: AIDA zufolge gilt das Visum 3 Monate ab Ausstellung für die Einreise (Colombo 10.12.). AA: gebührenfreies Visum, vor Einreise über das ETA-Portal beantragen, nur die offizielle Seite nutzen, Passnummer genau prüfen (0 statt O). AIDA: Transitvisum über immigration.gov.lk, Ausdruck muss bei der Einschiffung vorliegen – deshalb vor dem Abflug zu Hause ausdrucken. Beide Quellen nennen unterschiedliche Portale – im Zweifel bei AIDA nachfragen. Für beide Reisenden.'},
+ {id:'mu',land:'Mauritius',was:'Einreiseformular (All in One Travel Form, QR-Code)',ab:'2026-10-30',bis:'2026-11-19',
   links:[['safemauritius.govmu.org','https://safemauritius.govmu.org/']],
-  info:'AIDA: allen Reisenden empfohlen, alternativ Karte vor Ort. Am besten vor Abfahrt erledigen – auf See ist kein Internet inklusive; spätester Ausweichtermin 28.11. in Réunion. AA: Rückreiseticket, Unterkunft und Finanzmittel können verlangt werden. AA meldet für Oktober 2026 Unruhen, die Ausgangssperre endete am 19.10. – Lage vor dem 29.11. nochmals prüfen.'},
+  info:'Frühestens 30 Tage vor Ankunft (29.11.) → ab 30.10., mind. 24 Std. vor Reiseantritt (Reiseführer-Angaben, offizielles Zeitfenster nicht veröffentlicht). Spätestens an Land in Südafrika erledigen – auf See ist kein Internet inklusive. AIDA: allen Reisenden empfohlen, alternativ Karte vor Ort. AA: Rückreiseticket, Unterkunft und Finanzmittel können verlangt werden; im Oktober 2026 gab es Unruhen, Ausgangssperre endete am 19.10. – Lage vor dem 29.11. nochmals prüfen.'},
+ {id:'sc',land:'Seychellen',was:'Travel Authorisation (Einreisegenehmigung)',ab:'2026-11-03',bis:'2026-11-19',
+  links:[['seychelles.govtas.com','https://seychelles.govtas.com']],
+  info:'Frühestens 30 Tage vor Ankunft (Mahé 03.12.) → ab 03.11. (US-Außenministerium, Air Seychelles). AA + AIDA: vor Reisebeginn beantragen, Bearbeitung ca. 12–24 Std., Gebühr ca. 10 €. Benötigt: Reisepass, Foto/Selfie, Kontaktdaten, Kreditkarte. Ohne Genehmigung kann die Einreise verweigert werden. Alternativ Seychelles E-Border-App.'},
+ {id:'za-in',land:'Südafrika',was:'Traveller Declaration Einreise (Flug 16.11.) – Pflicht',ab:'2026-11-15',bis:'2026-11-16',
+  links:[['SARS Traveller Declaration','https://tools.sars.gov.za/sarsonlinequery/traveller'],['FAQ','https://www.sars.gov.za/travellerdeclaration/faqs-for-the-required-online-traveller-declarations-from-1-july-2026/']],
+  info:'Seit 01.07.2026 Pflicht (SARS). Frühestens 24 Std. vor Abflug des letzten Flugs direkt nach Südafrika – bei Umstieg zählt der letzte Flug. Auch per SATMS-App oder Kiosk am Flughafen. Ohne Erklärung wird die Einreise nicht verweigert, es kann aber dauern. AA: Pass 30 Tage über die Ausreise hinaus gültig, mind. 2 freie Seiten, kein Visum.'},
+ {id:'za-out',land:'Südafrika',was:'Traveller Declaration Ausreise (Schiff 21.11.)',ab:'2026-11-20',bis:'2026-11-21',
+  links:[['SARS Traveller Declaration','https://tools.sars.gov.za/sarsonlinequery/traveller']],
+  info:'SARS: Erklärung gilt für Ein- und Ausreise, auch auf dem Seeweg. Für die Ausreise nennt SARS kein Zeitfenster – am 20./21.11. vor Abfahrt (21.11., 20:00) erledigen oder am Terminal bzw. an Bord nachfragen.'},
  {id:'mv',land:'Malediven',was:'Elektronische Einreiseerklärung (96 Std. vorher)',ab:'2026-12-04',bis:'2026-12-08',
   links:[['travel.immigration.gov.mv','https://travel.immigration.gov.mv/']],
   info:'AA + AIDA: innerhalb von 96 Std. vor Ankunft (08.12., 08:00) ausfüllen → frühestens 04.12. ab ca. 08:00. Tipp: auf La Digue am 04.12. erledigen (Landgang mit Mobilfunk/WLAN). Visum gibt es kostenlos bei Ankunft. AA: Alkohol, E-Zigaretten verboten, Tabak begrenzt; verschreibungspflichtige Medikamente nur mit englischem Arztattest.'},
@@ -225,8 +228,15 @@ const EINREISE = [
 ];
 
 // Liegezeiten laut mykreuzfahrt.de (Reise 20.11.2026, ohne Gewähr – Tagesprogramm an Bord gilt).
+// Landprogramm vor der Kreuzfahrt (eigene Angaben): Orts-Infos statt Liegezeiten.
+const HEIMAT = {name:'Grevenbroich', lat:51.09, lon:6.59};
+const ABFLUG = '2026-11-16';
 const HAFEN = {
- '2026-11-20':{lat:-33.91,lon:18.42,an:'',ab:'Übernachtung',info:['Cruise Terminal an der V&A Waterfront – Waterfront zu Fuß, Innenstadt kurz per Taxi','Einschiffungszeit steht auf den AIDA-Tickets','Währung: Rand (ZAR) · Zeit: MEZ +1 Std.']},
+ '2026-11-16':{lat:-33.91,lon:19.12,land:true,nacht:'Franschhoek',info:['Flug nach Kapstadt (CPT) – Franschhoek ca. 1 Std. Fahrt vom Flughafen','In Südafrika gilt Linksverkehr','Weinregion im Tal, Ortskern gut zu Fuß','Währung: Rand (ZAR) · Zeit: MEZ +1 Std.']},
+ '2026-11-17':{lat:-33.95,lon:18.38,land:true,nacht:'Camps Bay',info:['Franschhoek → Camps Bay ca. 1,5 Std. Fahrt','Camps Bay: Strand vor den Twelve Apostles, Sonnenuntergang an der Promenade','Mobilfunk/WLAN nutzen: Uploads und offene Formulare erledigen']},
+ '2026-11-18':{lat:-33.95,lon:18.38,land:true,nacht:'Camps Bay',info:['Ganzer Tag rund um Kapstadt: Chapman’s Peak Drive, Kap-Halbinsel, Tafelberg (Seilbahn windabhängig)','Letzte gute Gelegenheit für offene Formulare: Mauritius, Seychellen']},
+ '2026-11-19':{lat:-33.38,lon:20.03,land:true,nacht:'Aquila Game Reserve',info:['Camps Bay → Aquila Game Reserve ca. 2 Std. Fahrt (Richtung Touws River, Karoo)','Safari-Aktivitäten zu festen Zeiten – Ankunftszeit mit der Lodge abstimmen','Morgen: Safari früh, danach zurück nach Kapstadt zur Einschiffung']},
+ '2026-11-20':{lat:-33.91,lon:18.42,an:'',ab:'Übernachtung',info:['Aquila → Kapstadt ca. 2 Std. Fahrt – Einschiffungszeit auf den AIDA-Tickets mit Puffer einplanen','Cruise Terminal an der V&A Waterfront – Waterfront zu Fuß, Innenstadt kurz per Taxi','Währung: Rand (ZAR) · Zeit: MEZ +1 Std.']},
  '2026-11-21':{lat:-33.91,lon:18.42,an:'',ab:'20:00',info:['Tafelberg-Seilbahn ist windabhängig – morgens Status prüfen','Währung: Rand (ZAR) · Zeit: MEZ +1 Std.']},
  '2026-11-23':{lat:-33.96,lon:25.62,an:'06:00',ab:'18:30',info:['Port Elizabeth heißt heute Gqeberha – Hafen direkt an der Innenstadt','Addo Elephant Park ca. 1 Std. Fahrt','Währung: Rand (ZAR) · Zeit: MEZ +1 Std.']},
  '2026-11-28':{lat:-20.93,lon:55.29,an:'08:00',ab:'18:00',info:['Le Port ist ein Industriehafen – Saint-Paul nah, Saint-Denis ca. 20 km','Französisches Überseegebiet: Euro, EU-Roaming gilt in der Regel','Zeit: MEZ +3 Std.']},
@@ -267,19 +277,42 @@ const PLAN = [
   hooks:[['Packliste für 31 Tage','31 Tage, ein Koffer, zwei Kontinente – das kommt mit.',['Flatlay vom offenen Koffer','Zeitraffer beim Packen','Close-ups: Mückenspray, Pass-Mappe, Adapter']],
    ['Mein Content-Setup','Mit diesem Setup drehe ich 31 Tage Reise-Content – ohne Laptop-Chaos.',['Alle Geräte auf dem Tisch ausbreiten','Kurz jedes Teil zeigen und benennen']],
    ['Mückenschutz ist Pflicht','In 8 von 9 Ländern dieser Route warnen die Einreisehinweise vor Dengue-Fieber.',['Text-Overlay mit den Ländern','Mückenspray und helle Kleidung zeigen']]]},
- {von:'2026-11-13',bis:'2026-11-19',typ:'prep',ort:'Countdown',land:'Letzte Woche vor Abfahrt',slug:'countdown',
+ {von:'2026-11-13',bis:'2026-11-15',typ:'prep',ort:'Countdown',land:'Letzte Tage vor dem Abflug',slug:'countdown',
   ziele:['Dokumentenmappe komplett','Countdown-Content läuft täglich'],
   aufgaben:['§Ausflüge, Spa-Termine und Restaurants im myAIDA Urlaubsportal reservieren',
    '§Dokumentenmappe: Pässe, Sri-Lanka-Visum (Ausdruck), Seychellen-Genehmigung, AIDA-Tickets, Rückflugticket, Versicherungsnachweis',
+   'Buchungen fürs Landprogramm in die Mappe: Flug 16.11., Franschhoek, Camps Bay, Aquila, Mietwagen/Transfers',
+   'Online-Check-in für den Flug am 16.11.',
    '§Rückflug ab Bangkok prüfen: nach Anlegen mind. 2 Std. für die Passkontrolle einplanen',
    'Ordnerstruktur in diesem Ordner prüfen, Speicherkarten formatieren'],
   hooks:[['Countdown','Noch 7 Tage. Dann geht es für 31 Tage aufs Meer.',['Tägliche Countdown-Zahl als Opener','Kurzer Clip aus den Vorbereitungen']],
    ['Diese Formulare vor der Kreuzfahrt','Fünf Online-Formulare musst du vor oder während dieser Kreuzfahrt ausfüllen – sonst gibt es Ärger am Hafen.',['Liste: Sri Lanka, Seychellen, Malediven, Malaysia, Singapur, Thailand','Reisebüro-Tipp am Ende: „Fragt uns, wir helfen“']],
    ['Warum Kreuzfahrt statt Rundreise?','Neun Länder, aber nur einmal Koffer auspacken – deshalb mache ich diese Reise per Schiff.',['Auspacken im Hotel vs. Kabine als Gegenüberstellung','Route kurz einblenden']]]},
 
+ {d:'2026-11-16',typ:'land',ort:'Anreise & Franschhoek',land:'Südafrika',
+  ziele:['Entspannt ankommen','Erste Südafrika-Clips drehen'],
+  aufgaben:['Abflug-Content: Gate, Flugzeugfenster, Ankunft Kapstadt','SIM/eSIM für Südafrika aktivieren – an Land Uploads erledigen','Story „Bevor das Schiff kommt“ posten'],
+  hooks:[['4 Tage Südafrika vorab','Bevor unser Schiff ablegt, haben wir noch vier Tage Südafrika an Land – das ist der Plan.',['Ankunft Flughafen Kapstadt','Plan als Text-Overlay: Franschhoek, Camps Bay, Safari']],
+   ['Franschhoek','Dieses Dorf in Südafrika sieht aus wie Frankreich – und hat einen guten Grund dafür.',['Hauptstraße, Weinberge, Berge im Hintergrund','Erklärung als Voice-over']]]},
+ {d:'2026-11-17',typ:'land',ort:'Franschhoek → Camps Bay',land:'Südafrika',
+  ziele:['Weinregion und Küste kontrastieren','Erstes Reel posten'],
+  aufgaben:['Weingut oder Wine Tram filmen','Reel „Ankunft Südafrika“ posten','Fahrt nach Camps Bay als Zeitraffer'],
+  hooks:[['Von den Weinbergen an den Strand','Morgens Weinberge, abends Atlantik – das geht in Südafrika an einem Tag.',['Split: Weinberg morgens / Strand abends','Fahrt-Zeitraffer']],
+   ['Sonnenuntergang Camps Bay','Dieser Sonnenuntergang vor den Twelve Apostles ist der Grund, warum alle nach Camps Bay wollen.',['Zeitraffer Promenade','Berge im Abendlicht']]]},
+ {d:'2026-11-18',typ:'land',ort:'Camps Bay',land:'Südafrika',
+  ziele:['Kap-Halbinsel drehen','Formulare vor der Kreuzfahrt abschließen'],
+  aufgaben:['Mauritius- und Seychellen-Formular erledigt? (letzte Gelegenheit mit gutem Netz)','Drehtag Kap-Halbinsel'],
+  hooks:[['Chapman’s Peak Drive','Eine der schönsten Küstenstraßen der Welt – und sie liegt direkt vor Kapstadt.',['Fahrt-POV','Aussichtspunkt mit Schwenk']],
+   ['Pinguine am Strand','Pinguine an einem Strand in Afrika? Ja, die gibt es hier.',['Tiere aus respektvollem Abstand','Reaktion in die Kamera']]]},
+ {d:'2026-11-19',typ:'land',ort:'Camps Bay → Aquila Game Reserve',land:'Südafrika',
+  ziele:['Safari-Content drehen','Material vor der Kreuzfahrt sichern'],
+  aufgaben:['Fahrt in die Karoo filmen','Abend-Safari drehen','Backup aller Landtage auf SSD'],
+  hooks:[['Safari 2 Stunden von Kapstadt','Nur zwei Stunden von Kapstadt entfernt – und plötzlich stehen hier Elefanten.',['Landschaftswechsel Karoo','Erste Tiersichtung']],
+   ['Letzte Nacht an Land','Letzte Nacht an Land, morgen geht es aufs Schiff – 31 Tage lang.',['Lodge am Abend','Persönlicher Ausblick in die Kamera']]]},
+
  {d:'2026-11-20',typ:'hafen',ort:'Kapstadt',land:'Südafrika',
   ziele:['Einschiffung entspannt dokumentieren','Erste Eindrücke vom Schiff festhalten','Story „Tag 1/31“ live'],
-  aufgaben:['Check-in-Ablauf filmen (keine Bordkarten-/Passdaten zeigen)','Kabine filmen, bevor die Koffer ausgepackt sind','Erste Story-Serie posten'],
+  aufgaben:['Morgens Safari, danach ca. 2 Std. Fahrt nach Kapstadt – Puffer zur Einschiffungszeit','Check-in-Ablauf filmen (keine Bordkarten-/Passdaten zeigen)','Kabine filmen, bevor die Koffer ausgepackt sind','Erste Story-Serie posten'],
   hooks:[['Tag 1 von 31','Heute startet meine 31-Tage-Kreuzfahrt – und das ist der erste Blick auf unser Schiff.',['AIDAstella am Kai, Tafelberg im Hintergrund','Gang über die Gangway (POV)','Erster Blick vom Außendeck']],
    ['Roomtour Meerblickkabine','So sieht eine Meerblickkabine aus, in der man 31 Tage wohnt.',['Tür öffnen als Einstieg','Fenster mit Meerblick','Bad, Stauraum, Bett']],
    ['Übernachtung in Kapstadt','Das Beste an dieser Route: Wir bleiben über Nacht in Kapstadt.',['Abendlicht über der Waterfront vom Deck','Stadtlichter im Zeitraffer']]]},
@@ -467,7 +500,9 @@ const load = (k,f) => { try { const v = localStorage.getItem(k); return v ? JSON
 const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
 
 PLAN.forEach(e => {
-  if (e.d) { e.von = e.bis = e.d; e.slug = slug(e.ort); e.tag = diffDays(TRIP_START, e.d) + 1; }
+  if (e.d) { e.von = e.bis = e.d; e.slug = slug(e.ort); }
+  if (e.d && e.typ === 'land') e.landTag = diffDays(ABFLUG, e.d) + 1;
+  else if (e.d) e.tag = diffDays(TRIP_START, e.d) + 1;
   e.folder = e.von + '_' + e.slug;
   e.hooks = e.hooks.map((h,i) => ({titel:h[0], text:h[1], shots:h[2], folder: pad(i+1)+'_'+slug(h[0])}));
 });
@@ -555,8 +590,15 @@ function renderHafen(e){
   card.hidden = false;
   const H = HAFEN[e.d];
   if (!H) {
+    $('#hafen-title').textContent = '⚓ Hafen-Infos';
     const next = PLAN.find(p=>p.d && p.d > e.d && HAFEN[p.d]);
     $('#hafen').innerHTML = `<p style="margin-top:0">Seetag – kein Landgang.</p>` + (next ? `<p class="note">Nächster Hafen: <b>${esc(next.ort)}</b> am ${ddmm(next.d)}${HAFEN[next.d].an?' · Ankunft '+HAFEN[next.d].an:''}</p>` : '');
+    return;
+  }
+  $('#hafen-title').textContent = H.land ? '📍 Orts-Infos' : '⚓ Hafen-Infos';
+  if (H.land) {
+    $('#hafen').innerHTML = `<div class="times"><span class="badge">Übernachtung: ${esc(H.nacht)}</span></div><ul class="facts">${H.info.map(i=>'<li>'+textHtml(i)+'</li>').join('')}</ul>
+      <p class="note" style="margin-bottom:0">Fahrzeiten grob geschätzt – je nach Verkehr.</p>`;
     return;
   }
   const t = [];
@@ -570,9 +612,8 @@ function renderHafen(e){
 // --- Wetter (Open-Meteo, ohne Schlüssel). Aktualisiert sich beim Öffnen mit Internet; offline gilt der letzte Stand. ---
 const WMO = c => c===0?['☀️','Sonnig']:c<=2?['🌤','Heiter']:c===3?['☁️','Bewölkt']:c<=48?['🌫','Nebel']:c<=57?['🌦','Niesel']:c<=67?['🌧','Regen']:c<=77?['🌨','Schnee']:c<=82?['🌦','Schauer']:['⛈','Gewitter'];
 function locFor(date){
-  if (date < TRIP_START) return {name:'Kapstadt (Abfahrtshafen)', ...HAFEN[TRIP_START]};
-  if (date > TRIP_END) return {name:'Laem Chabang', ...HAFEN[TRIP_END]};
-  if (HAFEN[date]) return {name: entryFor(date).ort, ...HAFEN[date]};
+  if (date < ABFLUG || date > TRIP_END) return {...HEIMAT};
+  if (HAFEN[date]) return {name: HAFEN[date].land ? HAFEN[date].nacht : entryFor(date).ort, ...HAFEN[date]};
   const ports = PLAN.filter(e=>e.d && HAFEN[e.d]);
   const a = ports.filter(e=>e.d < date).pop(), b = ports.find(e=>e.d > date);
   const f = diffDays(a.d,date)/diffDays(a.d,b.d), A = HAFEN[a.d], B = HAFEN[b.d];
@@ -597,7 +638,7 @@ async function fetchWx(date){
 }
 function needsWx(date){
   const w = wx[date], d = diffDays(todayIso, date), inRange = d >= -60 && d <= 15;
-  if (!w) return true;
+  if (!w || w.loc !== locFor(date).name) return true;
   if (inRange && w.src !== 'forecast') return true;
   if (w.src === 'forecast' && d >= -1 && Date.now() - w.at > 3*3600e3) return true;
   return false;
@@ -638,14 +679,16 @@ function renderDay(){
   $('#pick').value = cur;
   let label;
   if (e.typ === 'prep') {
-    const until = diffDays(cur, TRIP_START);
-    label = until > 0 ? `Noch ${until} Tage bis zur Abfahrt` : 'Nach der Reise';
-  } else label = `Reisetag ${e.tag}`;
+    const until = diffDays(cur, ABFLUG);
+    label = until > 0 ? `Noch ${until} Tage bis zum Abflug · ${diffDays(cur, TRIP_START)} bis zur Kreuzfahrt` : 'Nach der Reise';
+  } else if (e.typ === 'land') label = `Südafrika an Land · Tag ${e.landTag} von 4 · Kreuzfahrt in ${diffDays(cur, TRIP_START)} Tagen`;
+  else label = `Reisetag ${e.tag}`;
   const range = e.von === e.bis ? fmt(e.von) : `${parse(e.von).toLocaleDateString('de-DE')} – ${parse(e.bis).toLocaleDateString('de-DE')}`;
   const badges = [];
   if (e.typ==='hafen') badges.push('<span class="badge">⚓ Hafentag</span>');
   if (e.typ==='see') badges.push('<span class="badge">🌊 Seetag</span>');
   if (e.typ==='prep') badges.push('<span class="badge">🧳 Phase</span>');
+  if (e.typ==='land') badges.push('<span class="badge">🚗 Landprogramm</span>');
   if (e.reede) badges.push('<span class="badge warn" title="Laut Buchung: Ankerplatz vor dem Hafen möglich, Boots-Shuttle zum Landgang">Reedehafen möglich · Tender</span>');
   if (cur === todayIso) badges.push('<span class="badge">Heute</span>');
   const [n,t] = progressOf(e);
@@ -698,7 +741,7 @@ function renderAll(){
       : parse(e.von).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})+'–'+parse(e.bis).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
     const H = e.d && HAFEN[e.d];
     const times = H && (H.an || /^\d/.test(H.ab)) ? ` <span class="note">· ${H.an||''}${H.an&&/^\d/.test(H.ab)?'–':''}${/^\d/.test(H.ab)?H.ab:''}</span>` : '';
-    return `<tr class="row ${e===cE?'today':''}" data-go="${e.von}"><td>${when}</td><td>${e.tag||'–'}</td>
+    return `<tr class="row ${e===cE?'today':''}" data-go="${e.von}"><td>${when}</td><td>${e.tag || (e.landTag ? 'L'+e.landTag : '–')}</td>
       <td>${esc(e.ort)}${e.typ==='hafen'?' <span class="note">· '+esc(e.land)+'</span>':''}${e.reede?' ⚓':''}${times}</td>
       <td class="hide-sm">${e.hooks.length}</td>
       <td><span class="mini"><i style="width:${t?Math.round(n/t*100):0}%"></i></span>${n}/${t}</td></tr>`;

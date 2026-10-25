@@ -114,6 +114,7 @@ tr.today td{font-weight:600}
 @media (max-width:600px){.hide-sm{display:none}}
 dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);max-width:560px;width:calc(100% - 32px)}
 dialog input{width:100%;font:inherit;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.chip{font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--code)}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px)}
 .toast.show{opacity:1}
 </style>
@@ -122,14 +123,14 @@ dialog input{width:100%;font:inherit;padding:7px 9px;border-radius:8px;border:1p
 <header>
   <div>
     <h1>AIDA Content-Planer</h1>
-    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 5</span></div>
+    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 6</span></div>
   </div>
   <div class="spacer"></div>
   <div class="tabs" role="tablist">
     <button role="tab" id="tab-tag" aria-selected="true">Tag</button>
     <button role="tab" id="tab-alle" aria-selected="false">Alle Tage</button>
   </div>
-  <button id="btn-settings" title="Einstellungen">⚙ Ordner</button>
+  <button id="btn-settings" title="Ordner und Buchungsdaten">⚙ Einstellungen</button>
   <button id="btn-theme" title="Hell/Dunkel">◐</button>
 </header>
 
@@ -175,6 +176,12 @@ dialog input{width:100%;font:inherit;padding:7px 9px;border-radius:8px;border:1p
     <h3 style="margin-top:0">Hauptordner für Material</h3>
     <p class="note">Alle Tages- und Hook-Ordner liegen darunter, z. B. <code>…\2026-11-20_kapstadt\01_tag-1-von-31</code>.</p>
     <input id="i-base">
+    <h3>Buchungsdaten</h3>
+    <p class="note">Werden nur auf diesem Gerät gespeichert, nicht auf der öffentlichen Webseite.</p>
+    <label class="note" for="i-aida">AIDA-Buchungsnummer</label>
+    <input id="i-aida" inputmode="numeric" autocomplete="off">
+    <label class="note" for="i-flug" style="display:block;margin-top:8px">Filekey Flug Qatar Airways</label>
+    <input id="i-flug" autocomplete="off" autocapitalize="characters">
     <p style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:0">
       <button value="cancel">Abbrechen</button><button value="ok" class="primary" id="save-base">Speichern</button>
     </p>
@@ -185,6 +192,8 @@ dialog input{width:100%;font:inherit;padding:7px 9px;border-radius:8px;border:1p
 <script>
 // "§" am Anfang = Angabe stammt aus der Buchungsbestätigung (PDF), sonst Vorschlag.
 const DEFAULT_BASE = 'Desktop\\AIDA-Content';
+// Nur in der lokalen Datei vorbelegt; die öffentliche Online-Version bleibt leer (Eingabe unter ⚙).
+const DEFAULT_BUCHUNG = {aida:'', flug:''};
 const TRIP_START = '2026-11-20', TRIP_END = '2026-12-21';
 
 const ROUTINE = [
@@ -520,6 +529,8 @@ let done = load('acp.done2', {});
 let custom = load('acp.custom', {});
 let base = load('acp.base', DEFAULT_BASE);
 let wx = load('acp.wx', {});
+const storedBuchung = load('acp.buchung', {});
+const buchung = {aida: storedBuchung.aida || DEFAULT_BUCHUNG.aida, flug: storedBuchung.flug || DEFAULT_BUCHUNG.flug};
 let theme = load('acp.theme', null);
 if (theme) document.documentElement.dataset.theme = theme;
 const openDone = {};
@@ -705,6 +716,17 @@ function renderWetter(){
   ensureWx([cur, next]);
 }
 
+// Buchungsnummern an den Tagen, an denen man sie braucht: Flug vom Check-in bis zur Ankunft, AIDA in der Vorbereitung, bei Einschiffung und Ausschiffung.
+function buchungHtml(e){
+  const out = [];
+  const chip = (icon, label, val) => val
+    ? `<button class="chip" data-raw="${esc(val)}" title="Antippen zum Kopieren">${icon} ${label}: <b>${esc(val)}</b> ⧉</button>`
+    : `<button class="chip" data-open-settings="1">${icon} ${label}: unter ⚙ eintragen</button>`;
+  if (cur >= '2026-11-13' && cur <= LAND_START) out.push(chip('✈️','Filekey Qatar', buchung.flug));
+  if (e.typ === 'prep' && cur < ABFLUG || ['2026-11-19','2026-11-20','2026-11-21','2026-12-20','2026-12-21'].includes(cur)) out.push(chip('🚢','AIDA-Buchung', buchung.aida));
+  return out.length ? `<div class="badges" style="margin-top:10px">${out.join('')}</div>` : '';
+}
+
 function renderDay(){
   const e = entryFor(cur);
   $('#pick').value = cur;
@@ -728,7 +750,7 @@ function renderDay(){
   if (cur === todayIso) badges.push('<span class="badge">Heute</span>');
   const [n,t] = progressOf(e);
   $('#hero').innerHTML = `<div class="daylabel">${label}</div><h2>${esc(e.ort)}</h2>
-    <div class="meta">${esc(e.land)} · ${range}</div><div class="badges">${badges.join('')}</div>
+    <div class="meta">${esc(e.land)} · ${range}</div><div class="badges">${badges.join('')}</div>${buchungHtml(e)}
     <div class="progress"><div style="width:${t?Math.round(n/t*100):0}%"></div></div>
     <div class="ptext">${n} von ${t} erledigt</div>`;
 
@@ -828,6 +850,8 @@ document.addEventListener('click', ev=>{
   const b = ev.target.closest('button,tr');
   if (!b) return;
   if (b.dataset.copy) copy(b.dataset.copy+'\\','Pfad kopiert');
+  if (b.dataset.raw) copy(b.dataset.raw,'Kopiert: '+b.dataset.raw);
+  if (b.dataset.openSettings) $('#btn-settings').click();
   if (b.dataset.del){ const e=entryFor(cur); custom[e.von]=(custom[e.von]||[]).filter(c=>String(c.id)!==b.dataset.del); delete done[key(e,'c',b.dataset.del)]; save('acp.custom',custom); save('acp.done2',done); render(); }
   if (b.dataset.go){ cur=b.dataset.go; showTab('tag'); render(); }
 });
@@ -860,9 +884,12 @@ $('#btn-theme').onclick=()=>{
   const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
   theme = dark ? 'light' : 'dark'; document.documentElement.dataset.theme = theme; save('acp.theme', theme);
 };
-$('#btn-settings').onclick=()=>{ $('#i-base').value=base; $('#dlg').showModal(); };
-$('#dlg').addEventListener('close', ()=>{
-  if ($('#dlg').returnValue==='ok'){ const v=$('#i-base').value.trim(); if(v){ base=v; save('acp.base',base); render(); toast('Ordner gespeichert'); } }
+$('#btn-settings').onclick=()=>{ $('#i-base').value=base; $('#i-aida').value=buchung.aida; $('#i-flug').value=buchung.flug; $('#dlg').showModal(); };
+$('#dlg form').addEventListener('submit', ev=>{
+  if (!ev.submitter || ev.submitter.value!=='ok') return;
+  const v=$('#i-base').value.trim(); if(v){ base=v; save('acp.base',base); }
+  buchung.aida=$('#i-aida').value.trim(); buchung.flug=$('#i-flug').value.trim().toUpperCase();
+  save('acp.buchung', buchung); render(); toast('Gespeichert');
 });
 window.addEventListener('online', ()=>renderWetter());
 

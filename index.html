@@ -73,6 +73,7 @@ main{max-width:1100px;margin:0 auto;padding:18px 16px 40px}
 .badge.warn{background:var(--warn-soft);color:var(--warn)}
 .badge.bad{background:var(--bad-soft);color:var(--bad)}
 .badge.ok{background:var(--accent-soft);color:var(--done)}
+.hero .badge.alle{background:#fff;color:#b42318;font-weight:700}
 .hero .badge,.hero .badge.warn{background:rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(6px)}
 .chip{font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--code)}
 .hero .chip{background:rgba(255,255,255,.95);color:#0f2231;border-color:transparent}
@@ -196,7 +197,7 @@ dialog input{width:100%;font:inherit;padding:9px 12px;border-radius:12px;border:
 <header>
   <div>
     <h1><span class="logo">⚓</span>AIDA Content-Planer</h1>
-    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 13</span></div>
+    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 14</span></div>
   </div>
   <div class="spacer"></div>
   <div class="tabs" role="tablist">
@@ -939,8 +940,13 @@ function locFor(date){
 }
 // Sonnenauf-/-untergang ab Ankunft in Südafrika, offline berechnet (Sonnenstandsgleichung, Genauigkeit ca. ±2 Min.), in Ortszeit.
 function tzFor(date){
-  const port = HAFEN[date] ? date : (PLAN.find(p=>p.d && p.d > date && HAFEN[p.d]) || {}).d;
-  return port ? TZ[entryFor(port).land] : null;
+  if (HAFEN[date]) return TZ[entryFor(date).land];
+  // Seetage: Bordzeit wird schrittweise umgestellt – zwischen den Zeitzonen der Nachbarhäfen interpolieren
+  const ports = PLAN.filter(p=>p.d && HAFEN[p.d]);
+  const a = ports.filter(p=>p.d < date).pop(), b = ports.find(p=>p.d > date);
+  if (!a || !b) return null;
+  const za = TZ[entryFor(a.d).land], zb = TZ[entryFor(b.d).land], f = diffDays(a.d, date) / diffDays(a.d, b.d);
+  return Math.round((za + (zb - za) * f) * 2) / 2;
 }
 function sunFor(date){
   if (date < LAND_START || date > TRIP_END) return null;
@@ -1002,7 +1008,7 @@ function kleidung(t){
 function babyBox(date, label){
   const w = wx[date];
   if (!w) return `<div class="baby-row"><div class="wx-h">${label} · ${ddmm(date)}</div><div class="wx-meta">Noch keine Wetterdaten.</div></div>`;
-  const t = w.feel != null ? w.feel : w.tmax, st = uvStufe(w.uv);
+  const t = w.feel != null ? w.feel : w.tmax, st = uvStufe(w.uv == null ? null : Math.round(w.uv));
   const uv = st
     ? `<span class="badge ${st[1]}">☀️ UV ${Math.round(w.uv)} · ${st[0]}</span>${w.uvVon?` <span class="note">Schutz nötig ${w.uvVon}–${w.uvBis}</span>`:''}<div class="wx-meta">${st[2]}</div>`
     : `<span class="badge">☀️ UV-Vorhersage ab ${ddmm(addDays(date,-15))}</span><div class="wx-meta">${date >= LAND_START && date <= TRIP_END ? 'In Südafrika und den Tropen ist um diese Jahreszeit mit sehr hohem UV zu rechnen.' : 'Im deutschen Spätherbst ist UV kaum ein Thema.'}</div>`;
@@ -1178,6 +1184,14 @@ function renderDay(){
   (AUSFLUEGE[cur]||[]).forEach(a=>badges.push(`<span class="badge">🎟 ${esc(a.zeit)} ${esc(a.titel.split(':')[0])}</span>`));
   const sun = sunFor(cur);
   if (sun) badges.push(`<span class="badge warn">🌅 ${sun.rise} · 🌇 ${sun.set} <span style="font-weight:400">(${esc(sun.ort)})</span></span>`);
+  // Liegezeit und "Alle an Bord" (bei AIDA in der Regel 30 Min. vor Abfahrt, genaue Zeit im Tagesprogramm)
+  const H0 = e.d && HAFEN[e.d];
+  if (H0 && !H0.land && (H0.an || H0.ab)) {
+    const abZeit = /^\d\d:\d\d$/.test(H0.ab) ? H0.ab : '';
+    const liege = [H0.an ? 'an ' + H0.an : '', abZeit ? 'ab ' + abZeit : (H0.ab ? H0.ab : '')].filter(Boolean).join(' · ');
+    badges.push(`<span class="badge">🕐 ${esc(liege)}</span>`);
+    if (abZeit) { const [hh, mm] = abZeit.split(':').map(Number), m = hh*60 + mm - 30; badges.push(`<span class="badge alle">🚢 Alle an Bord ca. ${pad(Math.floor(m/60))}:${pad(m%60)}</span>`); }
+  }
   if (e.reede) badges.push('<span class="badge warn" title="Laut Buchung: Ankerplatz vor dem Hafen möglich, Boots-Shuttle zum Landgang">Reedehafen möglich · Tender</span>');
   if (cur === todayIso) badges.push('<span class="badge">Heute</span>');
   const [n,t] = progressOf(e);

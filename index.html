@@ -110,6 +110,17 @@ ul.check li.empty{color:var(--muted);font-size:14px}
 .add{display:flex;gap:6px;margin-top:12px}
 .add input{flex:1;min-width:0;font:inherit;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--code);color:var(--text)}
 
+.trip{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:start}
+.trip + .trip{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+@media (max-width:520px){.trip{grid-template-columns:1fr}}
+.qr{width:150px;height:150px;border-radius:12px;border:1px solid var(--line);background:#fff;padding:6px;cursor:zoom-in;object-fit:contain}
+.qr-add{width:150px;height:150px;border-radius:12px;border:2px dashed var(--line-strong);display:grid;place-items:center;text-align:center;font-size:13px;color:var(--muted);background:var(--code);padding:8px}
+.trip-title{font-weight:650;font-size:17px;letter-spacing:-.01em}
+.trip-ref{margin-top:4px}
+.qr-big{position:fixed;inset:0;z-index:50;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.qr-big[hidden]{display:none}
+.qr-big img{width:min(86vw,520px);height:auto;image-rendering:pixelated}
+.qr-big p{color:#5d7080;font-size:14px;margin:0}
 .hk-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:-4px 0 10px}
 .mini-btn{font-size:12.5px;padding:3px 10px;background:var(--code)}
 #l-hooks{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
@@ -167,7 +178,7 @@ dialog input{width:100%;font:inherit;padding:9px 12px;border-radius:12px;border:
 <header>
   <div>
     <h1><span class="logo">⚓</span>AIDA Content-Planer</h1>
-    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 9</span></div>
+    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 10</span></div>
   </div>
   <div class="spacer"></div>
   <div class="tabs" role="tablist">
@@ -188,6 +199,7 @@ dialog input{width:100%;font:inherit;padding:9px 12px;border-radius:12px;border:
     </div>
     <div class="hero" id="hero"></div>
     <div class="grid">
+      <div class="card full" id="ausflug-card" hidden><h3>🎟 Gebuchter Ausflug</h3><div id="ausflug"></div></div>
       <div class="card full"><h3>🛂 Einreise &amp; Formulare <span class="count" id="c-einreise"></span></h3><div id="l-einreise"></div></div>
       <div class="card"><h3>🌤 Wetter</h3><div id="wetter"></div></div>
       <div class="card" id="hafen-card"><h3 id="hafen-title">⚓ Hafen-Infos</h3><div id="hafen"></div></div>
@@ -234,6 +246,8 @@ dialog input{width:100%;font:inherit;padding:9px 12px;border-radius:12px;border:
   </form>
 </dialog>
 <div class="toast" id="toast"></div>
+<div class="qr-big" id="qr-big" hidden><img alt="QR-Code groß"><p>Zum Schließen antippen</p></div>
+<input type="file" id="tix-file" accept="image/*" hidden>
 
 <script>
 // "§" am Anfang = Angabe stammt aus der Buchungsbestätigung (PDF), sonst Vorschlag.
@@ -249,6 +263,23 @@ const DRIVE_NAME = {
 const DRIVE_VOR = '01_Vor der Reise (Teaser & Packliste)', DRIVE_NACH = '99_Nach der Reise (Rückblick & Verkauf)';
 // Nur in der lokalen Datei vorbelegt; die öffentliche Online-Version bleibt leer (Eingabe unter ⚙).
 const DEFAULT_BUCHUNG = {aida:'', flug:''};
+const DEFAULT_TICKETS = {};
+
+// Gebuchte Ausflüge. QR-Codes und Ticketnummern stehen nur in DEFAULT_TICKETS bzw. werden pro Gerät hinzugefügt.
+const AUSFLUEGE = {
+ '2026-11-21':[{id:'robben',titel:'Robben Island Museum',zeit:'09:00',zeitText:'Tour 09:00 · Boarding ab 08:15',anbieter:'Robben Island Museum',
+  treff:'Nelson Mandela Gateway to Robben Island (V&A Waterfront)',maps:'https://goo.gl/maps/Af9NGRV6qR1h69jM8',
+  infos:['Boarding 08:15 (45 Min. vorher), schließt 10 Min. vor Tourbeginn – wer zu spät ist, verliert das Ticket ohne Erstattung',
+   'Ausweis mitnehmen, er wird kontrolliert. Ticket gilt nur für diesen Termin und eine Person – prüfen, ob es ein Ticket für die zweite Person gibt',
+   'Drohnen und Filmequipment sind verboten – mit dem Handy drehen, vor Ort kurz nachfragen',
+   'Tour inkl. Fähre dauert üblicherweise ca. 3,5–4 Std.; danach Tafelberg/Waterfront, das Schiff legt um 20:00 ab']}],
+ '2026-11-23':[{id:'addo',titel:'Addo-Elefanten-Park: Safari mit Barbecue',zeit:'08:15',zeitText:'Abholung 08:15 · ganztägig',anbieter:'GetYourGuide',
+  treff:'Cruise Terminal Gqeberha (Port Elizabeth)',maps:'https://maps.google.com/?q=Cruise+Terminal+Gqeberha',
+  infos:['Schiff liegt ab 06:00 im Hafen und legt um 18:30 ab – Rückkehrzeit beim Anbieter bestätigen lassen, Alle-an-Bord-Zeit beachten',
+   'Ticket ist auch offline in der GetYourGuide-App und in Apple Wallet',
+   'Ticket für eine erwachsene Person – prüfen, ob es ein Ticket für die zweite Person gibt',
+   'Passend zu den Hooks des Tages: „Safari-Tag oder Stadt-Tag? Ich hab mich entschieden.“']}]
+};
 const TRIP_START = '2026-11-20', TRIP_END = '2026-12-21';
 
 const ROUTINE = [
@@ -660,6 +691,8 @@ let base = load('acp.base2', DEFAULT_BASE);
 let wx = load('acp.wx', {});
 const storedBuchung = load('acp.buchung', {});
 const buchung = {aida: storedBuchung.aida || DEFAULT_BUCHUNG.aida, flug: storedBuchung.flug || DEFAULT_BUCHUNG.flug};
+const storedTix = load('acp.tix', {});
+const ticketFor = id => Object.assign({}, DEFAULT_TICKETS[id] || {}, storedTix[id] || {});
 let theme = load('acp.theme', null);
 if (theme) document.documentElement.dataset.theme = theme;
 const openDone = {};
@@ -856,6 +889,39 @@ function buchungHtml(e){
   return out.length ? `<div class="badges" style="margin-top:10px">${out.join('')}</div>` : '';
 }
 
+function renderAusflug(){
+  const list = AUSFLUEGE[cur] || [];
+  $('#ausflug-card').hidden = !list.length;
+  $('#ausflug').innerHTML = list.map(a=>{
+    const t = ticketFor(a.id);
+    const qr = t.qr
+      ? `<img class="qr" src="${t.qr}" alt="QR-Code ${esc(a.titel)}" data-qr="${a.id}" title="Antippen zum Vergrößern">`
+      : `<button class="qr-add" data-tix="${a.id}">📷 Ticket-Screenshot mit QR-Code hinzufügen</button>`;
+    return `<div class="trip"><div>${qr}${t.qr?`<div class="note" style="margin-top:4px"><a href="#" data-tix="${a.id}">Bild ersetzen</a></div>`:''}</div><div>
+      <div class="trip-title">${esc(a.titel)}</div>
+      <div class="badges" style="margin-top:6px"><span class="badge">🕗 ${esc(a.zeitText)}</span><span class="badge">${esc(a.anbieter)}</span></div>
+      <div class="er-meta">📍 <a href="${a.maps}" target="_blank" rel="noopener">${esc(a.treff)}</a></div>
+      ${t.ref?`<div class="trip-ref"><button class="chip" data-raw="${esc(t.ref)}" title="Antippen zum Kopieren">🎫 ${esc(t.ref)} ⧉</button>${t.info?` <span class="note">${esc(t.info)}</span>`:''}</div>`:''}
+      <ul class="facts" style="margin-top:6px">${a.infos.map(i=>'<li>'+esc(i)+'</li>').join('')}</ul>
+    </div></div>`;
+  }).join('');
+}
+// Ticket-Bild vom Gerät wählen, verkleinern und nur lokal speichern.
+let tixTarget = null;
+function pickTicket(id){ tixTarget = id; $('#tix-file').value = ''; $('#tix-file').click(); }
+$('#tix-file').addEventListener('change', ev=>{
+  const f = ev.target.files[0]; if (!f || !tixTarget) return;
+  const img = new Image();
+  img.onload = () => {
+    const s = Math.min(1, 1000 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas'); c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    storedTix[tixTarget] = Object.assign({}, storedTix[tixTarget], {qr: c.toDataURL('image/jpeg', 0.9)});
+    save('acp.tix', storedTix); URL.revokeObjectURL(img.src); render(); toast('Ticket gespeichert – nur auf diesem Gerät');
+  };
+  img.src = URL.createObjectURL(f);
+});
+
 function renderDay(){
   const e = entryFor(cur);
   $('#pick').value = cur;
@@ -873,6 +939,7 @@ function renderDay(){
   if (e.typ==='prep') badges.push('<span class="badge">🧳 Phase</span>');
   if (e.typ==='land') badges.push('<span class="badge">🚗 Landprogramm</span>');
   if (e.typ==='flug') badges.push('<span class="badge">✈️ Abflug</span>');
+  (AUSFLUEGE[cur]||[]).forEach(a=>badges.push(`<span class="badge">🎟 ${esc(a.zeit)} ${esc(a.titel.split(':')[0])}</span>`));
   const sun = sunFor(cur);
   if (sun) badges.push(`<span class="badge warn">🌅 ${sun.rise} · 🌇 ${sun.set} <span style="font-weight:400">(${esc(sun.ort)})</span></span>`);
   if (e.reede) badges.push('<span class="badge warn" title="Laut Buchung: Ankerplatz vor dem Hafen möglich, Boots-Shuttle zum Landgang">Reedehafen möglich · Tender</span>');
@@ -884,6 +951,7 @@ function renderDay(){
     <div class="progress"><div style="width:${t?Math.round(n/t*100):0}%"></div></div>
     <div class="ptext">${n} von ${t} erledigt</div>`;
 
+  renderAusflug();
   renderEinreise();
   renderHafen(e);
   renderWetter();
@@ -929,7 +997,7 @@ function renderAll(){
     const H = e.d && HAFEN[e.d];
     const times = H && (H.an || /^\d/.test(H.ab)) ? ` <span class="note">· ${H.an||''}${H.an&&/^\d/.test(H.ab)?'–':''}${/^\d/.test(H.ab)?H.ab:''}</span>` : '';
     return `<tr class="row ${e===cE?'today':''}" data-go="${e.von}"><td>${when}</td><td>${e.tag || (e.landTag ? 'L'+e.landTag : e.typ==='flug' ? '✈️' : '–')}</td>
-      <td>${esc(e.ort)}${e.typ==='hafen'?' <span class="note">· '+esc(e.land)+'</span>':''}${e.reede?' ⚓':''}${times}</td>
+      <td>${esc(e.ort)}${e.typ==='hafen'?' <span class="note">· '+esc(e.land)+'</span>':''}${e.reede?' ⚓':''}${AUSFLUEGE[e.von]?' 🎟':''}${times}</td>
       <td class="hide-sm">${e.hooks.length}</td>
       <td><span class="mini"><i style="width:${t?Math.round(n/t*100):0}%"></i></span>${n}/${t}</td></tr>`;
   }).join('');
@@ -977,6 +1045,11 @@ document.addEventListener('toggle', ev=>{
   if (b) openDone[b] = ev.target.open;
 }, true);
 document.addEventListener('click', ev=>{
+  const q = ev.target.closest('[data-qr]');
+  if (q) { $('#qr-big img').src = q.src; $('#qr-big').hidden = false; return; }
+  if (ev.target.closest('#qr-big')) { $('#qr-big').hidden = true; return; }
+  const tx = ev.target.closest('[data-tix]');
+  if (tx) { ev.preventDefault(); pickTicket(tx.dataset.tix); return; }
   const b = ev.target.closest('button,tr');
   if (!b) return;
   if (b.dataset.copy) copy(b.dataset.copy+'\\','Pfad kopiert');

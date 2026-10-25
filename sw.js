@@ -1,9 +1,9 @@
 // Mit Internet wird immer die neueste Version geladen (max. 4 Sek. warten),
 // ohne Internet kommt die gespeicherte Version. Wetterdaten (fremde Server) laufen am Cache vorbei.
 // Fotos von Wikimedia werden einmal geladen und bleiben dauerhaft offline verfügbar.
-const CACHE = 'content-planer-v15';
+const CACHE = 'content-planer-v16';
 const IMG_CACHE = 'planer-fotos';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-512.png'];
+const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-512.png', './unterlagen/mietwagen-sunnycars.pdf'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE)

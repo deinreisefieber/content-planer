@@ -13,22 +13,26 @@
 :root{
   --bg:#f4f6f8; --card:#ffffff; --text:#14202b; --muted:#5b6b78; --line:#dde3e8;
   --accent:#0b7a8f; --accent-soft:#e2f3f6; --done:#2e8b57; --warn:#b4560b; --warn-soft:#fdf0e3;
+  --bad:#b42318; --bad-soft:#fdeceb;
   --pdf:#5a4fcf; --pdf-soft:#ecebfb; --code:#eef2f5;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0f161c; --card:#17212a; --text:#e5edf2; --muted:#93a4b1; --line:#2a3a46;
     --accent:#4cc3d6; --accent-soft:#16343b; --done:#5cc58a; --warn:#f0a35c; --warn-soft:#3a2a1a;
+    --bad:#f97066; --bad-soft:#3d1d1b;
     --pdf:#a69ff5; --pdf-soft:#29264a; --code:#1f2c36;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0f161c; --card:#17212a; --text:#e5edf2; --muted:#93a4b1; --line:#2a3a46;
   --accent:#4cc3d6; --accent-soft:#16343b; --done:#5cc58a; --warn:#f0a35c; --warn-soft:#3a2a1a;
+  --bad:#f97066; --bad-soft:#3d1d1b;
   --pdf:#a69ff5; --pdf-soft:#29264a; --code:#1f2c36;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+a{color:var(--accent)}
 header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 header h1{font-size:18px;margin:0}
 header .sub{color:var(--muted);font-size:13px}
@@ -47,14 +51,16 @@ main{max-width:1100px;margin:0 auto;padding:16px}
 .hero h2{margin:4px 0 2px;font-size:26px}
 .hero .meta{color:var(--muted)}
 .badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.badge{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.badge{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600;white-space:nowrap}
 .badge.warn{background:var(--warn-soft);color:var(--warn)}
+.badge.bad{background:var(--bad-soft);color:var(--bad)}
+.badge.ok{background:var(--accent-soft);color:var(--done)}
 .progress{height:8px;background:var(--line);border-radius:99px;margin-top:14px;overflow:hidden}
 .progress>div{height:100%;background:var(--done);transition:width .3s}
 .ptext{font-size:13px;color:var(--muted);margin-top:4px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:760px){.grid{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
 .card h3{margin:0 0 10px;font-size:16px;display:flex;align-items:center;gap:8px}
 .card h3 .count{margin-left:auto;font-size:12px;color:var(--muted);font-weight:400}
 .full{grid-column:1/-1}
@@ -62,26 +68,41 @@ ul.check{list-style:none;margin:0;padding:0}
 ul.check li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line)}
 ul.check li:first-child{border-top:0}
 ul.check input{margin-top:3px;width:18px;height:18px;accent-color:var(--done);flex:none}
-ul.check label{flex:1;cursor:pointer}
-li.is-done label{color:var(--muted);text-decoration:line-through}
+ul.check label{flex:1;cursor:pointer;min-width:0}
+ul.check li.empty{color:var(--muted);font-size:14px}
+.donebox{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px}
+.donebox summary{cursor:pointer;font-size:13px;color:var(--muted);padding:4px 0}
+.donebox li label{color:var(--muted);text-decoration:line-through}
+.donebox .hook{opacity:.65}
 .tag{font-size:11px;padding:1px 6px;border-radius:6px;background:var(--pdf-soft);color:var(--pdf);font-weight:600;margin-left:6px;white-space:nowrap}
 .del{border:0;background:none;color:var(--muted);padding:0 4px}
 .sub-h{font-size:13px;color:var(--muted);margin:14px 0 4px;font-weight:600}
 .add{display:flex;gap:6px;margin-top:10px}
 .add input{flex:1;min-width:0;font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
 .hook{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
-.hook.is-done{opacity:.65}
 .hook-head{display:flex;gap:10px;align-items:center}
 .hook-head input{width:20px;height:20px;accent-color:var(--done);flex:none}
 .hook-head .num{font-weight:700;color:var(--accent)}
 .hook-head .title{font-weight:600;flex:1}
 .hook blockquote{margin:10px 0;padding:8px 12px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;font-size:16px}
 .hook .shots{margin:6px 0 10px;padding-left:20px;color:var(--muted);font-size:14px}
-.path{display:flex;gap:6px;align-items:stretch}
+.path{display:flex;gap:6px;align-items:stretch;flex-wrap:wrap}
 .path code{flex:1;min-width:0;overflow-wrap:anywhere;background:var(--code);padding:6px 8px;border-radius:8px;font:13px/1.4 Consolas,monospace}
 .path button{font-size:13px;padding:4px 10px;white-space:nowrap}
 .note{font-size:13px;color:var(--muted)}
 .rule{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px;margin-top:12px}
+.er-title{font-weight:600}
+.er-meta{font-size:13px;color:var(--muted);margin-top:2px}
+.er-meta a{overflow-wrap:anywhere}
+.wx{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wx-day{background:var(--code);border-radius:10px;padding:10px 12px}
+.wx-h{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.wx-big{font-size:22px;font-weight:600;margin:2px 0}
+.wx-meta{font-size:13px;color:var(--muted)}
+.facts{list-style:none;margin:0;padding:0}
+.facts li{padding:5px 0;border-top:1px solid var(--line);font-size:14px}
+.facts li:first-child{border-top:0}
+.times{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 th,td{text-align:left;padding:9px 12px;border-top:1px solid var(--line);font-size:14px}
 th{background:var(--code);border-top:0;font-size:12px;text-transform:uppercase;color:var(--muted)}
@@ -93,7 +114,7 @@ tr.today td{font-weight:600}
 @media (max-width:600px){.hide-sm{display:none}}
 dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);max-width:560px;width:calc(100% - 32px)}
 dialog input{width:100%;font:inherit;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
-.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px)}
 .toast.show{opacity:1}
 </style>
 </head>
@@ -122,14 +143,17 @@ dialog input{width:100%;font:inherit;padding:7px 9px;border-radius:8px;border:1p
     </div>
     <div class="hero" id="hero"></div>
     <div class="grid">
-      <div class="card"><h3>🎯 Tagesziele <span class="count" id="c-ziele"></span></h3><ul class="check" id="l-ziele"></ul></div>
+      <div class="card full"><h3>🛂 Einreise &amp; Formulare <span class="count" id="c-einreise"></span></h3><div id="l-einreise"></div></div>
+      <div class="card"><h3>🌤 Wetter</h3><div id="wetter"></div></div>
+      <div class="card" id="hafen-card"><h3>⚓ Hafen-Infos</h3><div id="hafen"></div></div>
+      <div class="card"><h3>🎯 Tagesziele <span class="count" id="c-ziele"></span></h3><div id="l-ziele"></div></div>
       <div class="card"><h3>📣 Marketing-Aufgaben <span class="count" id="c-aufg"></span></h3>
-        <ul class="check" id="l-aufg"></ul>
-        <div id="routine-wrap"><div class="sub-h">Tagesroutine</div><ul class="check" id="l-routine"></ul></div>
+        <div id="l-aufg"></div>
+        <div id="routine-wrap"><div class="sub-h">Tagesroutine</div><div id="l-routine"></div></div>
         <form class="add" id="f-add"><input id="i-add" placeholder="Eigene Aufgabe für diesen Tag …"><button>+</button></form>
       </div>
       <div class="card full">
-        <h3>🎬 Hooks für heute <span class="count" id="c-hooks"></span></h3>
+        <h3>🎬 Hooks <span class="count" id="c-hooks"></span></h3>
         <div class="note">Material zu jedem Hook (Videos, Fotos, Sprachnotizen) kommt in den angezeigten Ordner. Die Datei <code>hook.md</code> darin enthält Hook-Text und Shotliste für die Weiterverarbeitung durch Claude.</div>
         <div class="path" style="margin-top:10px"><code id="dayfolder"></code><button id="copy-day">Pfad kopieren</button><button id="copy-ps" title="PowerShell-Befehl, der alle Ordner dieses Tages samt hook.md anlegt">Ordner-Befehl kopieren</button></div>
         <div id="l-hooks"></div>
@@ -171,12 +195,61 @@ const ROUTINE = [
   'Backup: Speicherkarte → SSD'
 ];
 
+// Einreise-Formulare: geprüft beim Auswärtigen Amt (Stand 25.10.2026) und mit den AIDA-Hinweisen aus der Buchung abgeglichen.
+// ab = frühester sinnvoller Tag, bis = spätester Tag.
+const EINREISE = [
+ {id:'lk',land:'Sri Lanka',was:'Visum (ETA) – Pflicht',ab:'2026-10-25',bis:'2026-11-19',
+  links:[['eta.gov.lk','https://www.eta.gov.lk'],['immigration.gov.lk','https://www.immigration.gov.lk']],
+  info:'AA: gebührenfreies Visum, vor Einreise über das ETA-Portal beantragen, nur die offizielle Seite nutzen, Passnummer genau prüfen (0 statt O). AIDA: Transitvisum über immigration.gov.lk, Ausdruck muss bei der Einschiffung vorliegen. Beide Quellen nennen unterschiedliche Portale – im Zweifel bei AIDA nachfragen, welches gilt. Für beide Reisenden.'},
+ {id:'sc',land:'Seychellen',was:'Travel Authorisation (Einreisegenehmigung)',ab:'2026-10-25',bis:'2026-11-19',
+  links:[['seychelles.govtas.com','https://seychelles.govtas.com']],
+  info:'AA + AIDA: vor Reisebeginn beantragen, Bearbeitung ca. 24 Std., gebührenpflichtig. Benötigt: Reisepass, Passbild, Kontaktdaten, Kredit-/Debitkarte. Ohne Genehmigung kann die Einreise verweigert werden. Alternativ Seychelles E-Border-App.'},
+ {id:'za',land:'Südafrika',was:'Traveller Declaration (freiwillig)',ab:'2026-10-25',bis:'2026-11-19',
+  links:[['sars.gov.za/travellerdeclaration','https://www.sars.gov.za/travellerdeclaration/']],
+  info:'AIDA: empfohlen, in der Pilotphase freiwillig. AA: Reisepass muss 30 Tage über die Ausreise hinaus gültig sein und mind. 2 freie Seiten haben. Kein Visum nötig.'},
+ {id:'mu',land:'Mauritius',was:'Einreiseformular (All in One Travel Form, QR-Code)',ab:'2026-10-25',bis:'2026-11-19',
+  links:[['safemauritius.govmu.org','https://safemauritius.govmu.org/']],
+  info:'AIDA: allen Reisenden empfohlen, alternativ Karte vor Ort. Am besten vor Abfahrt erledigen – auf See ist kein Internet inklusive; spätester Ausweichtermin 28.11. in Réunion. AA: Rückreiseticket, Unterkunft und Finanzmittel können verlangt werden. AA meldet für Oktober 2026 Unruhen, die Ausgangssperre endete am 19.10. – Lage vor dem 29.11. nochmals prüfen.'},
+ {id:'mv',land:'Malediven',was:'Elektronische Einreiseerklärung (96 Std. vorher)',ab:'2026-12-04',bis:'2026-12-08',
+  links:[['travel.immigration.gov.mv','https://travel.immigration.gov.mv/']],
+  info:'AA + AIDA: innerhalb von 96 Std. vor Ankunft (08.12., 08:00) ausfüllen → frühestens 04.12. ab ca. 08:00. Tipp: auf La Digue am 04.12. erledigen (Landgang mit Mobilfunk/WLAN). Visum gibt es kostenlos bei Ankunft. AA: Alkohol, E-Zigaretten verboten, Tabak begrenzt; verschreibungspflichtige Medikamente nur mit englischem Arztattest.'},
+ {id:'my',land:'Malaysia',was:'Malaysia Digital Arrival Card (MDAC)',ab:'2026-12-12',bis:'2026-12-15',
+  links:[['imigresen-online.imi.gov.my/mdac','https://imigresen-online.imi.gov.my/mdac/main']],
+  info:'AA + AIDA: innerhalb von 3 Tagen vor Einreise (15.12. Penang) → frühestens 12.12. Der 12.–14.12. sind Seetage: dafür Bord-Internet einplanen. Ob die Karte auch für Port Klang am 16.12. gilt, an Bord nachfragen. Pass mit zwei freien gegenüberliegenden Seiten.'},
+ {id:'sg',land:'Singapur',was:'SG Arrival Card',ab:'2026-12-14',bis:'2026-12-17',
+  links:[['eservices.ica.gov.sg/sgarrivalcard','https://eservices.ica.gov.sg/sgarrivalcard/']],
+  info:'AA: Pflicht für alle Reisenden. AIDA: innerhalb von 72 Std. vor Einreise (17.12.) → frühestens 14.12. Tipp: am 15.12. in Penang erledigen. AA: E-Zigaretten und Kaugummi dürfen nicht eingeführt werden, Medikamente auf hsa.gov.sg prüfen.'},
+ {id:'th',land:'Thailand',was:'Thailand Digital Arrival Card (TDAC)',ab:'2026-12-16',bis:'2026-12-19',
+  links:[['tdac.immigration.go.th','https://tdac.immigration.go.th/arrival-card/']],
+  info:'AA + AIDA: kostenlos, frühestens 3 Tage vor Ankunft (19.12. Ko Samui) → ab 16.12. Tipp: am 16.12. in Port Klang oder 17.12. in Singapur erledigen. AA: Nachweis von 20.000 THB pro Person in bar kann verlangt werden; auf dem Seeweg max. 2 visafreie Einreisen pro Jahr.'}
+];
+
+// Liegezeiten laut mykreuzfahrt.de (Reise 20.11.2026, ohne Gewähr – Tagesprogramm an Bord gilt).
+const HAFEN = {
+ '2026-11-20':{lat:-33.91,lon:18.42,an:'',ab:'Übernachtung',info:['Cruise Terminal an der V&A Waterfront – Waterfront zu Fuß, Innenstadt kurz per Taxi','Einschiffungszeit steht auf den AIDA-Tickets','Währung: Rand (ZAR) · Zeit: MEZ +1 Std.']},
+ '2026-11-21':{lat:-33.91,lon:18.42,an:'',ab:'20:00',info:['Tafelberg-Seilbahn ist windabhängig – morgens Status prüfen','Währung: Rand (ZAR) · Zeit: MEZ +1 Std.']},
+ '2026-11-23':{lat:-33.96,lon:25.62,an:'06:00',ab:'18:30',info:['Port Elizabeth heißt heute Gqeberha – Hafen direkt an der Innenstadt','Addo Elephant Park ca. 1 Std. Fahrt','Währung: Rand (ZAR) · Zeit: MEZ +1 Std.']},
+ '2026-11-28':{lat:-20.93,lon:55.29,an:'08:00',ab:'18:00',info:['Le Port ist ein Industriehafen – Saint-Paul nah, Saint-Denis ca. 20 km','Französisches Überseegebiet: Euro, EU-Roaming gilt in der Regel','Zeit: MEZ +3 Std.']},
+ '2026-11-29':{lat:-20.16,lon:57.50,an:'06:00',ab:'Übernachtung',info:['Terminal nahe Caudan Waterfront, Zentrum Port Louis zu Fuß','Währung: Rupie (MUR) · Zeit: MEZ +3 Std.','AA: Unruhen im Oktober 2026, Lage vorab prüfen']},
+ '2026-11-30':{lat:-20.16,lon:57.50,an:'',ab:'16:00',info:['Früh zurück an Bord: Abfahrt schon 16:00','Währung: Rupie (MUR) · Zeit: MEZ +3 Std.']},
+ '2026-12-03':{lat:-4.62,lon:55.45,an:'08:00',ab:'22:00',info:['Hafen Victoria – Zentrum zu Fuß, Strände per Taxi/Bus','Langer Hafentag bis 22:00','Währung: Seychellen-Rupie (SCR), Euro/US-Dollar oft akzeptiert · Zeit: MEZ +3 Std.']},
+ '2026-12-04':{lat:-4.36,lon:55.83,an:'06:00',ab:'18:00',tender:true,info:['Tenderboot nach La Passe','Fahrradverleih am Anleger – Anse Source d’Argent gut per Rad erreichbar','Heute ab ca. 08:00 Malediven-Einreiseerklärung ausfüllen (Mobilfunk/WLAN an Land)','Währung: SCR · Zeit: MEZ +3 Std.']},
+ '2026-12-08':{lat:4.18,lon:73.51,an:'08:00',ab:'18:00',tender:true,info:['Tenderboot in die Hauptstadt Malé','Muslimisches Land: in der Stadt Schultern und Knie bedecken','Währung: Rufiyaa (MVR), US-Dollar weit verbreitet · Zeit: MEZ +4 Std.']},
+ '2026-12-10':{lat:6.94,lon:79.84,an:'07:00',ab:'19:00',info:['Containerhafen – Shuttle zum Hafentor, Fort und Pettah nah','AA: Sri-Lanka-Rupien dürfen nicht ein-/ausgeführt werden – vor Ort tauschen','Zeit: MEZ +4:30 Std.']},
+ '2026-12-11':{lat:6.12,lon:81.11,an:'07:00',ab:'18:00',info:['Abgelegener Hafen – Yala-Nationalpark ca. 1,5–2 Std. Fahrt','Ausflug mit Zeitpuffer planen','Währung: Rupie (LKR) · Zeit: MEZ +4:30 Std.']},
+ '2026-12-15':{lat:5.41,lon:100.34,an:'08:00',ab:'16:00',tender:true,info:['Swettenham Pier liegt mitten in George Town (UNESCO-Altstadt)','Heute SG Arrival Card für Singapur ausfüllen','Währung: Ringgit (MYR) · Zeit: MEZ +7 Std.']},
+ '2026-12-16':{lat:3.00,lon:101.39,an:'07:00',ab:'17:00',info:['Kuala Lumpur ca. 1 Std. Fahrt ohne Stau – großzügigen Puffer einplanen','Heute Thailand Digital Arrival Card ausfüllen','Währung: Ringgit (MYR) · Zeit: MEZ +7 Std.']},
+ '2026-12-17':{lat:1.26,lon:103.82,an:'08:00',ab:'18:00',info:['Je nach Liegeplatz Marina Bay Cruise Centre oder HarbourFront – MRT gut angebunden','Verboten: E-Zigaretten und Kaugummi einführen','Währung: Singapur-Dollar (SGD) · Zeit: MEZ +7 Std.']},
+ '2026-12-19':{lat:9.53,lon:99.94,an:'08:30',ab:'18:30',tender:true,info:['Tenderboot, meist nach Nathon an der Westküste','Währung: Baht (THB) · Zeit: MEZ +6 Std.']},
+ '2026-12-20':{lat:13.08,lon:100.88,an:'13:00',ab:'Übernachtung',info:['Bangkok ca. 2 Std. Fahrt, Pattaya ca. 30–45 Min.','Währung: Baht (THB) · Zeit: MEZ +6 Std.']},
+ '2026-12-21':{lat:13.08,lon:100.88,an:'',ab:'Ausschiffung',info:['§Pässe sind ca. 2 Std. nach Ankunft abholbereit – Rückflug entsprechend planen','Währung: Baht (THB) · Zeit: MEZ +6 Std.']}
+};
+
 const PLAN = [
  {von:'2026-10-25',bis:'2026-11-01',typ:'prep',ort:'Vorbereitung 1',land:'Formalitäten & Ankündigung',slug:'vorbereitung-1',
   ziele:['Alle Pflicht-Formalitäten aus der Buchung angestoßen','Reise auf Social Media angekündigt'],
   aufgaben:['§Schiffsmanifest auf aida.de/myaida für beide Reisenden ausfüllen (Pflicht)',
    '§Reisepässe prüfen: mind. 6 Monate über Reiseende (21.12.2026) gültig, genug freie Seiten',
-   '§Sri Lanka: Transitvisum auf immigration.gov.lk beantragen und ausdrucken – ohne Ausdruck keine Einschiffung',
    '§Ab ca. 30.10.: AIDA-Tickets per E-Mail bzw. im myAIDA Urlaubsplaner prüfen',
    '§Reiseversicherungen prüfen (Rücktritt, Auslandsreisekrankenversicherung)',
    'Profil-Bio und Highlights auf „31 Tage Kapstadt → Bangkok“ vorbereiten'],
@@ -184,11 +257,11 @@ const PLAN = [
    ['Route in 30 Sekunden','9 Länder, 31 Tage, ein Schiff – das ist die Route.',['Karte abfahren: Kapstadt → Mauritius → Seychellen → Malediven → Sri Lanka → Singapur → Bangkok','Flaggen/Ortsnamen als Text-Overlay']],
    ['Der Ausdruck, den keiner auf dem Schirm hat','Ohne diesen Zettel darfst du in Kapstadt gar nicht erst aufs Schiff.',['Bildschirmaufnahme immigration.gov.lk (keine Passdaten zeigen)','Ausdruck in der Hand, in Dokumentenmappe stecken']]]},
  {von:'2026-11-02',bis:'2026-11-12',typ:'prep',ort:'Vorbereitung 2',land:'Technik, Gesundheit & Packen',slug:'vorbereitung-2',
-  ziele:['Einreise Seychellen und Gesundheit geklärt','Content-Technik komplett und getestet'],
-  aufgaben:['§Seychellen: digitale Einreisegenehmigung über seychelles.govtas.com oder E-Border-App (vor Reisebeginn, ca. 24 h Bearbeitung)',
-   '§Singapur: eigene Medikamente auf hsa.gov.sg/personal-medication prüfen (teils Einfuhrerlaubnis nötig)',
+  ziele:['Gesundheit und Medikamente geklärt','Content-Technik komplett und getestet'],
+  aufgaben:['§Medikamente: Singapur auf hsa.gov.sg/personal-medication prüfen; für die Malediven englisches Arztattest (Name, Medikament, Tagesdosis)',
    '§Impfberatung/Tropenarzt: u. a. Hepatitis A empfohlen; Mückenschutz wegen Dengue/Chikungunya/Malaria einpacken',
-   '§Internet an Bord klären: inklusive ist nur der Onboard Chat – Uploads per Internetpaket oder in den Häfen planen',
+   '§Internet an Bord klären: inklusive ist nur der Onboard Chat – für MDAC (12.–14.12. Seetage) wird Bord-Internet gebraucht',
+   'Bargeld: ca. 20.000 THB pro Person für Thailand einplanen (AA: Nachweis kann verlangt werden)',
    'Technik: Speicherkarten, Powerbank, Mikrofon, Backup-SSD, Ladegeräte, Reiseadapter',
    'Shotlisten für die Seetage vorbereiten (B-Roll an Bord)'],
   hooks:[['Packliste für 31 Tage','31 Tage, ein Koffer, zwei Kontinente – das kommt mit.',['Flatlay vom offenen Koffer','Zeitraffer beim Packen','Close-ups: Mückenspray, Pass-Mappe, Adapter']],
@@ -196,10 +269,8 @@ const PLAN = [
    ['Mückenschutz ist Pflicht','In 8 von 9 Ländern dieser Route warnen die Einreisehinweise vor Dengue-Fieber.',['Text-Overlay mit den Ländern','Mückenspray und helle Kleidung zeigen']]]},
  {von:'2026-11-13',bis:'2026-11-19',typ:'prep',ort:'Countdown',land:'Letzte Woche vor Abfahrt',slug:'countdown',
   ziele:['Dokumentenmappe komplett','Countdown-Content läuft täglich'],
-  aufgaben:['§Mauritius: Formular auf safemauritius.govmu.org ausfüllen (QR-Code), alternativ Karte vor Ort',
-   '§Südafrika: freiwillige Reiseanmeldung auf sars.gov.za/travellerdeclaration',
-   '§Ausflüge, Spa-Termine und Restaurants im myAIDA Urlaubsportal reservieren',
-   '§Dokumentenmappe: Pässe, Sri-Lanka-Visum (Ausdruck), AIDA-Tickets, Rückflugticket, Versicherungsnachweis',
+  aufgaben:['§Ausflüge, Spa-Termine und Restaurants im myAIDA Urlaubsportal reservieren',
+   '§Dokumentenmappe: Pässe, Sri-Lanka-Visum (Ausdruck), Seychellen-Genehmigung, AIDA-Tickets, Rückflugticket, Versicherungsnachweis',
    '§Rückflug ab Bangkok prüfen: nach Anlegen mind. 2 Std. für die Passkontrolle einplanen',
    'Ordnerstruktur in diesem Ordner prüfen, Speicherkarten formatieren'],
   hooks:[['Countdown','Noch 7 Tage. Dann geht es für 31 Tage aufs Meer.',['Tägliche Countdown-Zahl als Opener','Kurzer Clip aus den Vorbereitungen']],
@@ -245,7 +316,7 @@ const PLAN = [
    ['Nichts als Wasser','So sieht ein Tag im Indischen Ozean aus: 360 Grad nur Wasser.',['Zeitraffer Sonnenaufgang bis -untergang','Ruhige Musik']]]},
  {d:'2026-11-27',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
   ziele:['Einreise Réunion/Mauritius vorbereitet','Behind-the-Scenes-Content'],
-  aufgaben:['§Mauritius-Formular (safemauritius.govmu.org) erledigt? QR-Code bereithalten','§Mauritius: Rückflugticket und Nachweis finanzieller Mittel (mind. 100 USD p. P./Tag) griffbereit'],
+  aufgaben:['§Mauritius: QR-Code des Einreiseformulars bereithalten','§Mauritius: Rückflugticket und Nachweis finanzieller Mittel (mind. 100 USD p. P./Tag) griffbereit'],
   hooks:[['Mein Workflow auf See','So produziere ich jeden Tag Content – mitten auf dem Ozean.',['Schreibtisch in der Kabine','Ordnerstruktur am Handy/Laptop zeigen']],
    ['Einreise Mauritius','Vor Mauritius musst du ein Online-Formular ausfüllen – so geht es in 2 Minuten.',['Bildschirmaufnahme ohne persönliche Daten','QR-Code-Ergebnis (verpixelt)']]]},
  {d:'2026-11-28',typ:'hafen',ort:'Le Port',land:'La Réunion',
@@ -265,7 +336,7 @@ const PLAN = [
    ['Mauritius in 15 Sekunden','Mauritius in 15 Sekunden.',['Schnellschnitt der schönsten Clips beider Tage']]]},
  {d:'2026-12-01',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
   ziele:['Saison-Content (Dezember)','Mauritius-Reels posten'],
-  aufgaben:['§Seychellen-Einreisegenehmigung vorhanden? (vor Reisebeginn beantragt)','Reel Mauritius posten'],
+  aufgaben:['Reel Mauritius posten'],
   hooks:[['Sommer statt Weihnachtsstress','Während in Deutschland die Weihnachtsmärkte öffnen, sieht mein Dezember so aus.',['Kontrast-Schnitt: Winterbild vs. Pooldeck']],
    ['Onboard Chat','So bleiben wir an Bord in Kontakt – ohne teures Internet.',['Handy mit Chat (ohne Inhalte)','§Onboard Chat ist im Tarif inklusive']]]},
  {d:'2026-12-02',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
@@ -286,12 +357,12 @@ const PLAN = [
    ['Insel ohne Autos','Auf dieser Insel fährt man Fahrrad statt Auto.',['POV Fahrradfahrt','Klingel-Sound als Hook-Effekt']]]},
  {d:'2026-12-05',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
   ziele:['Halbzeit feiern','Seychellen-Reels posten'],
-  aufgaben:['§Malediven: Formular travel.immigration.gov.mv innerhalb von 96 Std. vor Ankunft (08.12.) – ab heute möglich','Reel Seychellen posten'],
+  aufgaben:['Reel Seychellen posten'],
   hooks:[['Halbzeit!','Halbzeit: 16 von 31 Tagen. Das waren meine Highlights bisher.',['Best-of der ersten Hälfte in 15 Sekunden']],
    ['Kabinen-Hacks','Drei Kabinen-Hacks, die eine lange Kreuzfahrt viel angenehmer machen.',['Ordnung im Schrank','Ladestation','Kleinkram-Organisation']]]},
  {d:'2026-12-06',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
   ziele:['Wellness-Content','Zeitraffer'],
-  aufgaben:['§Malediven-Formular erledigt?'],
+  aufgaben:['Wellness-Clips für Reel sichten'],
   hooks:[['Wellness auf See','Ein Seetag im Spa – so sieht Erholung mitten im Ozean aus.',['Spa-Bereich (wenn erlaubt)','Ruhige Detailaufnahmen']],
    ['Sonnenuntergang auf See','Kein Land in Sicht – nur dieser Sonnenuntergang.',['Zeitraffer vom Deck']]]},
  {d:'2026-12-07',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
@@ -306,7 +377,7 @@ const PLAN = [
    ['Malé – die Hauptstadt, die keiner zeigt','Alle zeigen die Resorts. Ich zeige euch die Hauptstadt Malé.',['Straßen, Markt, Moschee von außen']]]},
  {d:'2026-12-09',typ:'see',ort:'Erholung auf See',land:'Indischer Ozean',
   ziele:['Malediven-Fazit','Sri Lanka vorbereiten'],
-  aufgaben:['§Sri-Lanka-Transitvisum (Ausdruck) bereitlegen','Reel Malediven posten'],
+  aufgaben:['§Sri-Lanka-Visum (Ausdruck) bereitlegen','Reel Malediven posten'],
   hooks:[['Malediven-Fazit','Lohnt sich ein Tag Malediven auf einer Kreuzfahrt? Mein ehrliches Fazit.',['Fazit in die Kamera, Clips dazwischen']],
    ['Einreise Sri Lanka','Für Sri Lanka brauchst du schon vor der Kreuzfahrt ein Visum – und zwar ausgedruckt.',['Ausdruck zeigen (Daten abdecken)','§Transitvisum für bis zu 48 Std.']]]},
  {d:'2026-12-10',typ:'hafen',ort:'Colombo',land:'Sri Lanka',
@@ -321,17 +392,17 @@ const PLAN = [
    ['Elefanten vom Kreuzfahrtschiff aus','Von diesem Hafen aus kommst du zu wilden Elefanten.',['Safari-Clips','Fazit']]]},
  {d:'2026-12-12',typ:'see',ort:'Erholung auf See',land:'Golf von Bengalen',
   ziele:['Asien-Etappe ankündigen','Reisebüro-Expertise zeigen'],
-  aufgaben:['§Malaysia: MDAC-Formular (imigresen-online.imi.gov.my/mdac) innerhalb von 72 Std. vor Einreise (15.12.)','Reel Sri Lanka posten'],
+  aufgaben:['Reel Sri Lanka posten'],
   hooks:[['Was 3 Wochen Kreuzfahrt mit dir machen','Was drei Wochen Kreuzfahrt mit dir machen.',['Vorher/Nachher-Stimmung, humorvoll']],
    ['Für wen ist so eine lange Kreuzfahrt?','Für wen ist eine 31-Tage-Kreuzfahrt eigentlich etwas? Ehrliche Einschätzung aus dem Reisebüro.',['3 Typen als Text-Overlay','Call-to-Action: Fragen per DM']]]},
  {d:'2026-12-13',typ:'see',ort:'Erholung auf See',land:'Andamanensee',
   ziele:['Formular-Überblick liefern','Behind the Scenes'],
-  aufgaben:['§MDAC Malaysia erledigt?'],
+  aufgaben:['Schnitt-Session für Asien-Reels'],
   hooks:[['Die Asien-Formulare im Überblick','Malaysia, Singapur, Thailand: Drei Länder, drei Online-Formulare – mit Fristen.',['§Malaysia 72 Std., Singapur 72 Std., Thailand 3 Tage vorher']],
    ['Schnitt auf See','Behind the Scenes: So schneide ich meine Videos auf dem Schiff.',['Bildschirm mit Timeline','Kabine/Deck als Arbeitsplatz']]]},
  {d:'2026-12-14',typ:'see',ort:'Erholung auf See',land:'Andamanensee',
   ziele:['Mythen-Content','Penang vorbereiten'],
-  aufgaben:['§Singapur: SG Arrival Card (eservices.ica.gov.sg/sgarrivalcard) innerhalb von 72 Std. vor Einreise (17.12.)'],
+  aufgaben:['Penang-Shotliste vorbereiten'],
   hooks:[['Kreuzfahrt-Mythen','Drei Kreuzfahrt-Mythen – und was nach 25 Tagen davon stimmt.',['Mythos als Text, Antwort in die Kamera']],
    ['Letzte Abende auf See','Nur noch wenige Abende an Bord – so genieße ich sie.',['Abendstimmung Deck']]]},
  {d:'2026-12-15',typ:'hafen',ort:'Penang',land:'Malaysia',reede:true,
@@ -341,7 +412,7 @@ const PLAN = [
    ['Street Food Penang','Penang gilt als Street-Food-Hauptstadt Malaysias – ich teste es.',['Garküche, Probieren, Reaktion']]]},
  {d:'2026-12-16',typ:'hafen',ort:'Port Klang',land:'Malaysia',
   ziele:['Kuala-Lumpur-Ausflug drehen'],
-  aufgaben:['§Thailand: Digital Arrival Card (tdac.immigration.go.th) innerhalb von 3 Tagen vor Ankunft (19.12.) – ab heute','Ausflug filmen'],
+  aufgaben:['Ausflug filmen'],
   hooks:[['Kuala Lumpur vom Hafen aus','Lohnt sich der Weg vom Hafen nach Kuala Lumpur? Ich habe es getestet.',['Fahrt','Ankunft Skyline','Fazit']],
    ['Petronas Towers','Diese Türme wollte ich schon immer einmal sehen.',['Low-Angle-Shot nach oben','Abendlicht falls möglich']]]},
  {d:'2026-12-17',typ:'hafen',ort:'Singapur',land:'Singapur',
@@ -351,7 +422,7 @@ const PLAN = [
    ['Medikamente nach Singapur','Achtung: Manche ganz normalen Medikamente brauchen in Singapur eine Genehmigung.',['§Hinweis hsa.gov.sg','Reisebüro-Tipp']]]},
  {d:'2026-12-18',typ:'see',ort:'Erholung auf See',land:'Golf von Thailand',
   ziele:['Abschied vom Bordleben','Abreise vorbereiten'],
-  aufgaben:['§Thailand Digital Arrival Card erledigt?','§Rückflug: 2 Std. Passkontrolle in Bangkok/Laem Chabang einplanen','Gepäck- und Ausschiffungsinfos an Bord prüfen'],
+  aufgaben:['§Rückflug: 2 Std. Passkontrolle in Bangkok/Laem Chabang einplanen','Gepäck- und Ausschiffungsinfos an Bord prüfen'],
   hooks:[['Letzter Seetag','Der letzte Seetag nach 29 Tagen – und so fühlt es sich an.',['Ruhige Clips, persönlicher Voice-over']],
    ['Was ich vermissen werde','Fünf Dinge, die ich an Bord vermissen werde.',['Je ein Clip pro Punkt']]]},
  {d:'2026-12-19',typ:'hafen',ort:'Ko Samui',land:'Thailand',reede:true,
@@ -385,7 +456,9 @@ const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y
 const addDays = (s,n) => { const d = parse(s); d.setDate(d.getDate()+n); return iso(d); };
 const diffDays = (a,b) => Math.round((parse(b)-parse(a))/864e5);
 const fmt = s => parse(s).toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
-const esc = s => s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ddmm = s => pad(parse(s).getDate())+'.'+pad(parse(s).getMonth()+1)+'.';
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hsh = s => { let x = 0; for (const c of s) x = (x*31 + c.codePointAt(0))|0; return (x>>>0).toString(36); };
 function slug(s){
   return s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40).replace(/-$/,'');
@@ -399,11 +472,14 @@ PLAN.forEach(e => {
   e.hooks = e.hooks.map((h,i) => ({titel:h[0], text:h[1], shots:h[2], folder: pad(i+1)+'_'+slug(h[0])}));
 });
 
-let done = load('acp.done', {});
+// Häkchen werden über den Text gespeichert, damit sie beim Umsortieren von Aufgaben erhalten bleiben.
+let done = load('acp.done2', {});
 let custom = load('acp.custom', {});
 let base = load('acp.base', DEFAULT_BASE);
+let wx = load('acp.wx', {});
 let theme = load('acp.theme', null);
 if (theme) document.documentElement.dataset.theme = theme;
+const openDone = {};
 
 const todayIso = iso(new Date());
 const urlDate = new URLSearchParams(location.search).get('datum');
@@ -413,16 +489,17 @@ function entryFor(date){
   if (date < PLAN[0].von) return PLAN[0];
   return PLAN.find(e => e.von <= date && date <= e.bis) || PLAN[PLAN.length-1];
 }
-const key = (e,kind,i) => e.von+'|'+kind+'|'+i;
+const key = (e,kind,t) => e.von+'|'+kind+'|'+hsh(String(t));
 const routineKey = (date,i) => date+'|r|'+i;
+const erKey = x => 'e|'+x.id;
 const winPath = (...p) => [base.replace(/\\+$/,''), ...p].join('\\');
 
 function itemsOf(e, date){
   const list = [];
-  e.ziele.forEach((_,i)=>list.push(key(e,'z',i)));
-  e.aufgaben.forEach((_,i)=>list.push(key(e,'a',i)));
-  e.hooks.forEach((_,i)=>list.push(key(e,'h',i)));
-  (custom[e.von]||[]).forEach((c)=>list.push(key(e,'c',c.id)));
+  e.ziele.forEach(z=>list.push(key(e,'z',z)));
+  e.aufgaben.forEach(a=>list.push(key(e,'a',a)));
+  e.hooks.forEach(h=>list.push(key(e,'h',h.titel)));
+  (custom[e.von]||[]).forEach(c=>list.push(key(e,'c',c.id)));
   if (e.typ !== 'prep' && date) ROUTINE.forEach((_,i)=>list.push(routineKey(date,i)));
   return list;
 }
@@ -433,9 +510,127 @@ function textHtml(t){
   return esc(pdf ? t.slice(1) : t) + (pdf ? '<span class="tag" title="Angabe aus der Buchungsbestätigung">aus Buchung</span>' : '');
 }
 function checkLi(k, html, extra=''){
-  const c = done[k] ? 'checked' : '';
   const id = 'cb-'+k.replace(/[^a-z0-9]/gi,'_');
-  return `<li class="${done[k]?'is-done':''}"><input type="checkbox" id="${id}" data-k="${k}" ${c}><label for="${id}">${html}</label>${extra}</li>`;
+  return `<li><input type="checkbox" id="${id}" data-k="${k}" ${done[k]?'checked':''}><label for="${id}">${html}</label>${extra}</li>`;
+}
+// Offene Punkte oben, erledigte eingeklappt darunter (wiederfindbar, wieder abhakbar).
+function listHtml(boxId, entries, emptyText){
+  const open = entries.filter(x=>!done[x.k]), closed = entries.filter(x=>done[x.k]);
+  let h = '<ul class="check">' + open.map(x=>checkLi(x.k,x.html,x.extra)).join('');
+  if (!open.length && entries.length) h += `<li class="empty">${emptyText||'Alles erledigt 🎉'}</li>`;
+  h += '</ul>';
+  if (closed.length) h += `<details class="donebox" data-box="${boxId}" ${openDone[boxId]?'open':''}><summary>✓ Erledigt (${closed.length}) anzeigen</summary><ul class="check">`
+    + closed.map(x=>checkLi(x.k,x.html,x.extra)).join('') + '</ul></details>';
+  return h;
+}
+const countTxt = entries => entries.filter(x=>done[x.k]).length+'/'+entries.length;
+
+function renderEinreise(){
+  const items = EINREISE.map(x=>{
+    const k = erKey(x);
+    let status;
+    if (done[k]) status = '<span class="badge ok">erledigt</span>';
+    else if (cur > x.bis) status = '<span class="badge bad">Frist vorbei – prüfen!</span>';
+    else if (cur >= x.ab) status = `<span class="badge bad">jetzt ausfüllen · bis ${ddmm(x.bis)}</span>`;
+    else status = `<span class="badge">ab ${ddmm(x.ab)} möglich</span>`;
+    const links = x.links.map(l=>`<a href="${l[1]}" target="_blank" rel="noopener">${esc(l[0])}</a>`).join(' · ');
+    return {k, x, html:`<div class="er-title">${esc(x.land)} – ${esc(x.was)} ${status}</div><div class="er-meta">${links}</div><div class="er-meta">${esc(x.info)}</div>`};
+  });
+  const now = items.filter(i=>!done[i.k] && cur >= i.x.ab);
+  const later = items.filter(i=>!done[i.k] && cur < i.x.ab);
+  const fin = items.filter(i=>done[i.k]);
+  let h = '<ul class="check">' + now.map(i=>checkLi(i.k,i.html)).join('');
+  if (!now.length) h += '<li class="empty">Gerade ist kein Formular fällig.</li>';
+  h += '</ul>';
+  if (later.length) h += `<details class="donebox" data-box="er-later" ${openDone['er-later']?'open':''}><summary>⏳ Später fällig (${later.length}) – nächstes ab ${ddmm(later[0].x.ab)}</summary><ul class="check">`+later.map(i=>checkLi(i.k,i.html)).join('')+'</ul></details>';
+  if (fin.length) h += `<details class="donebox" data-box="er-done" ${openDone['er-done']?'open':''}><summary>✓ Erledigt (${fin.length}) anzeigen</summary><ul class="check">`+fin.map(i=>checkLi(i.k,i.html)).join('')+'</ul></details>';
+  h += '<p class="note" style="margin-bottom:0">Geprüft beim <a href="https://www.auswaertiges-amt.de/de/reiseundsicherheit/reise-und-sicherheitshinweise" target="_blank" rel="noopener">Auswärtigen Amt</a> (Stand 25.10.2026) und mit den AIDA-Hinweisen abgeglichen. Kurz vor der Reise nochmals prüfen – Regeln können sich ändern.</p>';
+  $('#l-einreise').innerHTML = h;
+  $('#c-einreise').textContent = now.length ? now.length+' jetzt fällig' : fin.length+'/'+items.length+' erledigt';
+}
+
+function renderHafen(e){
+  const card = $('#hafen-card');
+  if (e.typ === 'prep') { card.hidden = true; return; }
+  card.hidden = false;
+  const H = HAFEN[e.d];
+  if (!H) {
+    const next = PLAN.find(p=>p.d && p.d > e.d && HAFEN[p.d]);
+    $('#hafen').innerHTML = `<p style="margin-top:0">Seetag – kein Landgang.</p>` + (next ? `<p class="note">Nächster Hafen: <b>${esc(next.ort)}</b> am ${ddmm(next.d)}${HAFEN[next.d].an?' · Ankunft '+HAFEN[next.d].an:''}</p>` : '');
+    return;
+  }
+  const t = [];
+  if (H.an) t.push(`<span class="badge">an ${H.an}</span>`);
+  if (H.ab) t.push(`<span class="badge">${/^\d/.test(H.ab)?'ab '+H.ab:esc(H.ab)}</span>`);
+  if (H.tender || e.reede) t.push('<span class="badge warn">Tender/Reede möglich</span>');
+  $('#hafen').innerHTML = `<div class="times">${t.join('')}</div><ul class="facts">${H.info.map(i=>'<li>'+textHtml(i)+'</li>').join('')}</ul>
+    <p class="note" style="margin-bottom:0">Liegezeiten laut mykreuzfahrt.de, ohne Gewähr – maßgeblich ist das Tagesprogramm an Bord.</p>`;
+}
+
+// --- Wetter (Open-Meteo, ohne Schlüssel). Aktualisiert sich beim Öffnen mit Internet; offline gilt der letzte Stand. ---
+const WMO = c => c===0?['☀️','Sonnig']:c<=2?['🌤','Heiter']:c===3?['☁️','Bewölkt']:c<=48?['🌫','Nebel']:c<=57?['🌦','Niesel']:c<=67?['🌧','Regen']:c<=77?['🌨','Schnee']:c<=82?['🌦','Schauer']:['⛈','Gewitter'];
+function locFor(date){
+  if (date < TRIP_START) return {name:'Kapstadt (Abfahrtshafen)', ...HAFEN[TRIP_START]};
+  if (date > TRIP_END) return {name:'Laem Chabang', ...HAFEN[TRIP_END]};
+  if (HAFEN[date]) return {name: entryFor(date).ort, ...HAFEN[date]};
+  const ports = PLAN.filter(e=>e.d && HAFEN[e.d]);
+  const a = ports.filter(e=>e.d < date).pop(), b = ports.find(e=>e.d > date);
+  const f = diffDays(a.d,date)/diffDays(a.d,b.d), A = HAFEN[a.d], B = HAFEN[b.d];
+  return {name:`Auf See zwischen ${a.ort} und ${b.ort}`, lat:A.lat+(B.lat-A.lat)*f, lon:A.lon+(B.lon-A.lon)*f};
+}
+async function getJson(u){ const r = await fetch(u); if (!r.ok) throw new Error(r.status); return r.json(); }
+async function fetchWx(date){
+  const L = locFor(date), lat = L.lat.toFixed(2), lon = L.lon.toFixed(2);
+  const d = diffDays(todayIso, date);
+  if (d >= -60 && d <= 15) {
+    const j = await getJson(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,uv_index_max&timezone=auto&start_date=${date}&end_date=${date}`);
+    let wave = null;
+    try { const m = await getJson(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&daily=wave_height_max&timezone=auto&start_date=${date}&end_date=${date}`); wave = m.daily.wave_height_max[0]; } catch(e){}
+    const D = j.daily;
+    return {src:'forecast', at:Date.now(), loc:L.name, code:D.weather_code[0], tmax:D.temperature_2m_max[0], tmin:D.temperature_2m_min[0],
+      pop:D.precipitation_probability_max[0], wind:D.wind_speed_10m_max[0], uv:D.uv_index_max[0], wave};
+  }
+  const ref = (Number(date.slice(0,4))-1) + date.slice(4);
+  const j = await getJson(`https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=auto&start_date=${ref}&end_date=${ref}`);
+  const D = j.daily;
+  return {src:'vorjahr', ref, at:Date.now(), loc:L.name, code:D.weather_code[0], tmax:D.temperature_2m_max[0], tmin:D.temperature_2m_min[0], rain:D.precipitation_sum[0], wind:D.wind_speed_10m_max[0]};
+}
+function needsWx(date){
+  const w = wx[date], d = diffDays(todayIso, date), inRange = d >= -60 && d <= 15;
+  if (!w) return true;
+  if (inRange && w.src !== 'forecast') return true;
+  if (w.src === 'forecast' && d >= -1 && Date.now() - w.at > 3*3600e3) return true;
+  return false;
+}
+let wxBusy = {};
+async function ensureWx(dates){
+  if (!navigator.onLine) return;
+  let changed = false;
+  for (const date of dates) {
+    if (!needsWx(date) || wxBusy[date]) continue;
+    wxBusy[date] = true;
+    try { wx[date] = await fetchWx(date); changed = true; } catch(e) {} finally { delete wxBusy[date]; }
+  }
+  if (changed) { save('acp.wx', wx); renderWetter(); }
+}
+function wxBox(label, date){
+  const w = wx[date];
+  if (!w) return `<div class="wx-day"><div class="wx-h">${label} · ${ddmm(date)}</div><div class="wx-meta">Noch keine Daten – werden beim Öffnen mit Internet geladen.</div></div>`;
+  const [ic, txt] = WMO(w.code), r = v => v==null ? '–' : Math.round(v);
+  const meta = w.src === 'forecast'
+    ? [`Regen ${r(w.pop)} %`, `Wind ${r(w.wind)} km/h`, w.uv!=null?`UV ${r(w.uv)}`:'', w.wave!=null?`Wellen ${w.wave.toFixed(1).replace('.',',')} m`:''].filter(Boolean).join(' · ')
+    : [`Niederschlag ${w.rain==null?'–':w.rain.toFixed(1).replace('.',',')} mm`, `Wind ${r(w.wind)} km/h`].join(' · ');
+  const srcTxt = w.src === 'forecast'
+    ? `Vorhersage, Stand ${new Date(w.at).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`
+    : `Vorjahreswert vom ${ddmm(w.ref)}${w.ref.slice(0,4)} – echte Vorhersage ab ${ddmm(addDays(date,-15))}`;
+  return `<div class="wx-day"><div class="wx-h">${label} · ${ddmm(date)}</div><div class="wx-big">${ic} ${r(w.tmax)}° / ${r(w.tmin)}°</div>
+    <div class="wx-meta">${txt} · ${meta}</div><div class="wx-meta">${esc(w.loc)}</div><div class="wx-meta">${srcTxt}</div></div>`;
+}
+function renderWetter(){
+  const next = addDays(cur, 1);
+  $('#wetter').innerHTML = `<div class="wx">${wxBox(cur===todayIso?'Heute':'Dieser Tag', cur)}${wxBox(cur===todayIso?'Morgen':'Folgetag', next)}</div>
+    <p class="note" style="margin-bottom:0">Aktualisiert sich bei jedem Öffnen mit Internet, auch für den Folgetag. Auf See ohne Internet bleibt der letzte Stand stehen. Daten: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>.</p>`;
+  ensureWx([cur, next]);
 }
 
 function renderDay(){
@@ -459,31 +654,40 @@ function renderDay(){
     <div class="progress"><div style="width:${t?Math.round(n/t*100):0}%"></div></div>
     <div class="ptext">${n} von ${t} erledigt</div>`;
 
-  $('#l-ziele').innerHTML = e.ziele.map((z,i)=>checkLi(key(e,'z',i), textHtml(z))).join('');
-  $('#c-ziele').textContent = e.ziele.filter((_,i)=>done[key(e,'z',i)]).length+'/'+e.ziele.length;
+  renderEinreise();
+  renderHafen(e);
+  renderWetter();
 
-  const cust = custom[e.von]||[];
-  $('#l-aufg').innerHTML = e.aufgaben.map((a,i)=>checkLi(key(e,'a',i), textHtml(a))).join('')
-    + cust.map(c=>checkLi(key(e,'c',c.id), esc(c.text), `<button class="del" data-del="${c.id}" title="Löschen">✕</button>`)).join('');
-  const aKeys = e.aufgaben.map((_,i)=>key(e,'a',i)).concat(cust.map(c=>key(e,'c',c.id)));
-  $('#c-aufg').textContent = aKeys.filter(k=>done[k]).length+'/'+aKeys.length;
+  const zi = e.ziele.map(z=>({k:key(e,'z',z), html:textHtml(z)}));
+  $('#l-ziele').innerHTML = listHtml('ziele', zi);
+  $('#c-ziele').textContent = countTxt(zi);
+
+  const au = e.aufgaben.map(a=>({k:key(e,'a',a), html:textHtml(a)}))
+    .concat((custom[e.von]||[]).map(c=>({k:key(e,'c',c.id), html:esc(c.text), extra:`<button class="del" data-del="${c.id}" title="Löschen">✕</button>`})));
+  $('#l-aufg').innerHTML = listHtml('aufg', au);
+  $('#c-aufg').textContent = countTxt(au);
 
   $('#routine-wrap').hidden = e.typ === 'prep';
-  $('#l-routine').innerHTML = e.typ==='prep' ? '' : ROUTINE.map((r,i)=>checkLi(routineKey(e.d,i), esc(r))).join('');
+  $('#l-routine').innerHTML = e.typ==='prep' ? '' : listHtml('routine', ROUTINE.map((r,i)=>({k:routineKey(e.d,i), html:esc(r)})), 'Routine für heute erledigt ✓');
 
   $('#dayfolder').textContent = winPath(e.folder);
-  $('#l-hooks').innerHTML = e.hooks.map((h,i)=>{
-    const k = key(e,'h',i), id='cb-'+k.replace(/[^a-z0-9]/gi,'_');
+  const hookHtml = (h,i) => {
+    const k = key(e,'h',h.titel), id='cb-'+k.replace(/[^a-z0-9]/gi,'_');
     const p = winPath(e.folder, h.folder);
-    return `<div class="hook ${done[k]?'is-done':''}">
+    return `<div class="hook">
       <div class="hook-head"><input type="checkbox" id="${id}" data-k="${k}" ${done[k]?'checked':''}>
         <span class="num">${pad(i+1)}</span><label class="title" for="${id}">${esc(h.titel)}</label></div>
       <blockquote>„${esc(h.text)}“</blockquote>
       <ul class="shots">${h.shots.map(s=>'<li>'+textHtml(s)+'</li>').join('')}</ul>
       <div class="path"><code>${esc(p)}\\</code><button data-copy="${esc(p)}">Pfad kopieren</button></div>
     </div>`;
-  }).join('');
-  $('#c-hooks').textContent = e.hooks.filter((_,i)=>done[key(e,'h',i)]).length+'/'+e.hooks.length+' erledigt';
+  };
+  const hk = e.hooks.map((h,i)=>({h,i,k:key(e,'h',h.titel)}));
+  const hOpen = hk.filter(x=>!done[x.k]), hDone = hk.filter(x=>done[x.k]);
+  $('#l-hooks').innerHTML = hOpen.map(x=>hookHtml(x.h,x.i)).join('')
+    + (!hOpen.length ? '<p class="note">Alle Hooks für diesen Tag erledigt 🎉</p>' : '')
+    + (hDone.length ? `<details class="donebox" data-box="hooks" ${openDone.hooks?'open':''}><summary>✓ Erledigte Hooks (${hDone.length}) anzeigen</summary>${hDone.map(x=>hookHtml(x.h,x.i)).join('')}</details>` : '');
+  $('#c-hooks').textContent = hDone.length+'/'+hk.length+' erledigt';
 }
 
 function renderAll(){
@@ -492,8 +696,10 @@ function renderAll(){
     const [n,t] = progressOf(e);
     const when = e.von===e.bis ? parse(e.von).toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'})
       : parse(e.von).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})+'–'+parse(e.bis).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
+    const H = e.d && HAFEN[e.d];
+    const times = H && (H.an || /^\d/.test(H.ab)) ? ` <span class="note">· ${H.an||''}${H.an&&/^\d/.test(H.ab)?'–':''}${/^\d/.test(H.ab)?H.ab:''}</span>` : '';
     return `<tr class="row ${e===cE?'today':''}" data-go="${e.von}"><td>${when}</td><td>${e.tag||'–'}</td>
-      <td>${esc(e.ort)}${e.typ==='hafen'?' <span class="note">· '+esc(e.land)+'</span>':''}${e.reede?' ⚓':''}</td>
+      <td>${esc(e.ort)}${e.typ==='hafen'?' <span class="note">· '+esc(e.land)+'</span>':''}${e.reede?' ⚓':''}${times}</td>
       <td class="hide-sm">${e.hooks.length}</td>
       <td><span class="mini"><i style="width:${t?Math.round(n/t*100):0}%"></i></span>${n}/${t}</td></tr>`;
   }).join('');
@@ -522,7 +728,7 @@ function psFor(entries){
 }
 window.psAll = () => psFor(PLAN);
 
-function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1600); }
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200); }
 async function copy(text, msg){
   try { await navigator.clipboard.writeText(text); }
   catch(e){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
@@ -533,14 +739,18 @@ async function copy(text, msg){
 document.addEventListener('change', ev=>{
   const k = ev.target.dataset && ev.target.dataset.k;
   if (!k) return;
-  if (ev.target.checked) done[k]=true; else delete done[k];
-  save('acp.done', done); render();
+  if (ev.target.checked) { done[k]=true; toast('Erledigt – unter „Erledigt“ wiederzufinden'); } else delete done[k];
+  save('acp.done2', done); render();
 });
+document.addEventListener('toggle', ev=>{
+  const b = ev.target.dataset && ev.target.dataset.box;
+  if (b) openDone[b] = ev.target.open;
+}, true);
 document.addEventListener('click', ev=>{
   const b = ev.target.closest('button,tr');
   if (!b) return;
   if (b.dataset.copy) copy(b.dataset.copy+'\\','Pfad kopiert');
-  if (b.dataset.del){ const e=entryFor(cur); custom[e.von]=(custom[e.von]||[]).filter(c=>String(c.id)!==b.dataset.del); delete done[key(e,'c',b.dataset.del)]; save('acp.custom',custom); save('acp.done',done); render(); }
+  if (b.dataset.del){ const e=entryFor(cur); custom[e.von]=(custom[e.von]||[]).filter(c=>String(c.id)!==b.dataset.del); delete done[key(e,'c',b.dataset.del)]; save('acp.custom',custom); save('acp.done2',done); render(); }
   if (b.dataset.go){ cur=b.dataset.go; showTab('tag'); render(); }
 });
 $('#f-add').addEventListener('submit', ev=>{
@@ -576,6 +786,7 @@ $('#btn-settings').onclick=()=>{ $('#i-base').value=base; $('#dlg').showModal();
 $('#dlg').addEventListener('close', ()=>{
   if ($('#dlg').returnValue==='ok'){ const v=$('#i-base').value.trim(); if(v){ base=v; save('acp.base',base); render(); toast('Ordner gespeichert'); } }
 });
+window.addEventListener('online', ()=>renderWetter());
 
 render();
 

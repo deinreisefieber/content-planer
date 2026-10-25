@@ -1,6 +1,7 @@
 // Speichert den Planer beim ersten Aufruf, danach läuft er ohne Internet.
 // Bei Internet wird im Hintergrund die neueste Version geladen (gilt ab dem nächsten Öffnen).
-const CACHE = 'content-planer-v1';
+// Wetterdaten (fremde Server) laufen am Cache vorbei, damit sie immer frisch sind.
+const CACHE = 'content-planer-v2';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -14,7 +15,7 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
+  if (e.request.method !== 'GET' || new URL(e.request.url).origin !== self.location.origin) return;
   e.respondWith(caches.open(CACHE).then(async cache => {
     const hit = await cache.match(e.request, { ignoreSearch: true });
     const net = fetch(e.request).then(res => {

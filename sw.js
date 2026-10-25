@@ -1,6 +1,6 @@
 // Mit Internet wird immer die neueste Version geladen (max. 4 Sek. warten),
 // ohne Internet kommt die gespeicherte Version. Wetterdaten (fremde Server) laufen am Cache vorbei.
-const CACHE = 'content-planer-v10';
+const CACHE = 'content-planer-v11';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

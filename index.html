@@ -211,7 +211,7 @@ dialog input{width:100%;font:inherit;padding:9px 12px;border-radius:12px;border:
 <header>
   <div>
     <h1><span class="logo">⚓</span>AIDA Content-Planer</h1>
-    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 18</span></div>
+    <div class="sub">AIDAstella · Kapstadt → Bangkok · 20.11.–21.12.2026 · <span title="Programmversion">Version 19</span></div>
   </div>
   <div class="spacer"></div>
   <div class="tabs" role="tablist">
@@ -451,6 +451,12 @@ const AUSFLUEGE = {
   infos:['Vorher in der Nähe volltanken (gleiche Menge wie bei Übernahme), Tankquittung aufheben',
    'Gebucht bis 15:00 – spätere Rückgabe kann extra kosten; danach Alle an Bord ca. 19:30',
    'Kaution kommt innerhalb von bis zu 30 Tagen zurück']}],
+ '2026-12-03':[{id:'seychellen',noqr:true,icon:'🛂',titel:'Einreisegenehmigung Seychellen (Travel Authorisation)',zeit:'08:00',zeitText:'Ankunft Mahé 08:00 · Single Entry',anbieter:'Seychelles Electronic Border System',
+  treff:'Hafen Victoria, Mahé',maps:'https://maps.google.com/?q=Port+Victoria+Mahe+Seychelles',
+  imgs:[['Lucas','unterlagen/seychellen-ta-lucas.png'],['Jacqueline','unterlagen/seychellen-ta-jacqueline.png'],['Louis','unterlagen/seychellen-ta-louis.png']],
+  infos:['Genehmigt für Lucas (Ref. 498XV6XE), Jacqueline (Ref. 4GXPVYXE) und Louis (Ref. 4PYJWQ3E) – Ankunft 03.12.2026, Zweck Urlaub, Anreise mit AIDAstella',
+   'Gilt auch für La Digue am 04.12. (gleicher Aufenthalt)',
+   'Genehmigung mit QR-Code und Reisepass bereithalten, wenn AIDA oder die Einreisebehörde danach fragt – am besten zusätzlich ausgedruckt in die Dokumentenmappe']}],
  '2026-11-23':[{id:'addo',titel:'Addo-Elefanten-Park: Safari mit Barbecue',zeit:'08:15',zeitText:'Abholung 08:15 · ganztägig',anbieter:'GetYourGuide',
   treff:'Cruise Terminal Gqeberha (Port Elizabeth)',maps:'https://maps.google.com/?q=Cruise+Terminal+Gqeberha',
   infos:['Schiff liegt ab 06:00 im Hafen und legt um 18:30 ab – Rückkehrzeit beim Anbieter bestätigen lassen, Alle-an-Bord-Zeit beachten',
@@ -477,9 +483,9 @@ const EINREISE = [
  {id:'mu',nach:'2026-11-30',land:'Mauritius',was:'Einreiseformular (All in One Travel Form, QR-Code)',ab:'2026-10-30',bis:'2026-11-19',
   links:[['safemauritius.govmu.org','https://safemauritius.govmu.org/']],
   info:'Frühestens 30 Tage vor Ankunft (29.11.) → ab 30.10., mind. 24 Std. vor Reiseantritt (Reiseführer-Angaben, offizielles Zeitfenster nicht veröffentlicht). Spätestens an Land in Südafrika erledigen – auf See ist kein Internet inklusive. AIDA: allen Reisenden empfohlen, alternativ Karte vor Ort. AA: Rückreiseticket, Unterkunft und Finanzmittel können verlangt werden; im Oktober 2026 gab es Unruhen, Ausgangssperre endete am 19.10. – Lage vor dem 29.11. nochmals prüfen.'},
- {id:'sc',nach:'2026-12-04',land:'Seychellen',was:'Travel Authorisation (Einreisegenehmigung)',ab:'2026-11-03',bis:'2026-11-19',
+ {id:'sc',fertig:true,nach:'2026-12-04',land:'Seychellen',was:'Travel Authorisation (Einreisegenehmigung)',ab:'2026-11-03',bis:'2026-11-19',
   links:[['seychelles.govtas.com','https://seychelles.govtas.com']],
-  info:'Frühestens 30 Tage vor Ankunft (Mahé 03.12.) → ab 03.11. (US-Außenministerium, Air Seychelles). AA + AIDA: vor Reisebeginn beantragen, Bearbeitung ca. 12–24 Std., Gebühr ca. 10 €. Benötigt: Reisepass, Foto/Selfie, Kontaktdaten, Kreditkarte. Ohne Genehmigung kann die Einreise verweigert werden. Alternativ Seychelles E-Border-App.'},
+  info:'✅ Erledigt: Genehmigungen für alle drei liegen vor (Single Entry, Ankunft 03.12.) – Lucas 498XV6XE, Jacqueline 4GXPVYXE, Louis 4PYJWQ3E. Bilder am 03.12. unter „Gebucht“. Frühestens 30 Tage vor Ankunft (Mahé 03.12.) → ab 03.11. (US-Außenministerium, Air Seychelles). AA + AIDA: vor Reisebeginn beantragen, Bearbeitung ca. 12–24 Std., Gebühr ca. 10 €. Benötigt: Reisepass, Foto/Selfie, Kontaktdaten, Kreditkarte. Ohne Genehmigung kann die Einreise verweigert werden. Alternativ Seychelles E-Border-App.'},
  {id:'za-in',nach:'2026-11-12',land:'Südafrika',was:'Traveller Declaration Einreise (Flug 11.11.) – Pflicht',ab:'2026-11-10',bis:'2026-11-12',
   links:[['SARS Traveller Declaration','https://tools.sars.gov.za/sarsonlinequery/traveller'],['FAQ','https://www.sars.gov.za/travellerdeclaration/faqs-for-the-required-online-traveller-declarations-from-1-july-2026/']],
   info:'Seit 01.07.2026 Pflicht (SARS). Frühestens 24 Std. vor Abflug des letzten Flugs direkt nach Südafrika: Frankfurt → Johannesburg (DE 2288) startet am 11.11. um 20:20 → möglich ab 10.11., 20:20. Der Inlandsflug nach Kapstadt zählt nicht. Für alle drei ausfüllen: Lucas, Jacqueline und Louis. Auch per SATMS-App oder Kiosk am Flughafen. Ohne Erklärung wird die Einreise nicht verweigert, es kann aber dauern. AA: Pass 30 Tage über die Ausreise hinaus gültig, mind. 2 freie Seiten, kein Visum.'},
@@ -891,6 +897,8 @@ PLAN.forEach(e => {
 
 // Häkchen werden über den Text gespeichert, damit sie beim Umsortieren von Aufgaben erhalten bleiben.
 let done = load('acp.done2', {});
+// Bereits erledigte Formulare (fertig:true) gelten auf jedem Gerät als abgehakt, solange man es dort nicht selbst ändert.
+EINREISE.forEach(x => { if (x.fertig && !(('e|'+x.id) in done)) done['e|'+x.id] = true; });
 let custom = load('acp.custom', {});
 let base = load('acp.base2', DEFAULT_BASE);
 let wx = load('acp.wx', {});
@@ -1215,7 +1223,7 @@ function renderAusflug(){
       <div class="trip-title">${esc(a.titel)}</div>
       <div class="badges" style="margin-top:6px"><span class="badge">🕗 ${esc(a.zeitText)}</span><span class="badge">${esc(a.anbieter)}</span></div>
       <div class="er-meta">📍 <a href="${a.maps}" target="_blank" rel="noopener">${esc(a.treff)}</a></div>
-      ${a.pdf||a.img?`<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${a.pdf?`<a class="chip" href="${a.pdf}" target="_blank" rel="noopener">📄 Unterlagen (PDF)</a>`:''}${a.img?`<a class="chip" href="${a.img}" target="_blank" rel="noopener">📷 Buchung anzeigen</a>`:''}</div>`:''}
+      ${a.pdf||a.img||a.imgs?`<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${a.pdf?`<a class="chip" href="${a.pdf}" target="_blank" rel="noopener">📄 Unterlagen (PDF)</a>`:''}${a.img?`<a class="chip" href="${a.img}" target="_blank" rel="noopener">📷 Buchung anzeigen</a>`:''}${(a.imgs||[]).map(m=>`<a class="chip" href="${m[1]}" target="_blank" rel="noopener">📷 ${esc(m[0])}</a>`).join('')}</div>`:''}
       ${t.ref?`<div class="trip-ref"><button class="chip" data-raw="${esc(t.ref)}" title="Antippen zum Kopieren">🎫 ${esc(t.ref)} ⧉</button>${t.info?` <span class="note">${esc(t.info)}</span>`:''}</div>`:''}
       <ul class="facts" style="margin-top:6px">${a.infos.map(i=>'<li>'+esc(i)+'</li>').join('')}</ul>
     </div></div>`;
